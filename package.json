@@ -1,0 +1,115 @@
+{
+    "name": "toggle-excluded-files",
+    "version": "0.0.1",
+    "author": {
+        "name": "Eric Amodio",
+        "email": "eamodio@gmail.com"
+    },
+    "publisher": "eamodio",
+    "engines": {
+        "vscode": "^1.8.0"
+    },
+    "license": "SEE LICENSE IN LICENSE",
+    "displayName": "Toggle Excluded Files",
+    "description": "Toggles excluded (hidden) files visibility in the file explorer",
+    "categories": [
+        "Other"
+    ],
+    "keywords": [
+        "file",
+        "hidden",
+        "exclude",
+        "show",
+        "explorer"
+    ],
+    "galleryBanner": {
+        "color": "#56098c",
+        "theme": "dark"
+    },
+    "icon": "images/icon.png",
+    "preview": true,
+    "homepage": "https://github.com/eamodio/vscode-toggle-excluded-files/blob/master/README.md",
+    "bugs": {
+        "url": "https://github.com/eamodio/vscode-toggle-excluded-files/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/eamodio/vscode-toggle-excluded-files.git"
+    },
+    "main": "./out/src/extension",
+    "contributes": {
+        "configuration": {
+            "type": "object",
+            "title": "Toggle Excluded Files configuration",
+            "properties": {
+                "toggleexcludedfiles.statusBar.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Specifies whether to show a toggle button in the status bar"
+                },
+                "toggleexcludedfiles.advanced.debug": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Specifies debug mode"
+                },
+                "toggleexcludedfiles.advanced.output.level": {
+                    "type": "string",
+                    "default": "silent",
+                    "enum": [
+                        "silent",
+                        "errors",
+                        "verbose"
+                    ],
+                    "description": "Specifies how much (if any) output will be sent to the ToggleExcludedFiles output channel"
+                }
+            }
+        },
+        "commands": [
+            {
+                "command": "toggleexcludedfiles.show",
+                "title": "Show Excluded Files in Explorer",
+                "category": "Files"
+            },
+            {
+                "command": "toggleexcludedfiles.hide",
+                "title": "Hide Excluded Files in Explorer",
+                "category": "Files"
+            },
+            {
+                "command": "toggleexcludedfiles.toggle",
+                "title": "Toggle Excluded Files in Explorer",
+                "category": "Files"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "toggleexcludedfiles.toggle",
+                "key": "ctrl+shift+a",
+                "mac": "cmd+shift+a",
+                "when": "!editorFocus"
+            }
+        ]
+    },
+    "activationEvents": [
+        "*"
+    ],
+    "scripts": {
+        "compile": "tsc -watch -p ./",
+        "lint": "tslint --project tslint.json",
+        "pack": "git clean -xdf && npm install && vsce package",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "pub": "git clean -xdf --exclude=node_modules/ && npm install && vsce publish",
+        "vscode:prepublish": "tsc -p ./"
+    },
+    "dependencies": {
+        "lodash.isequal": "^4.4.0"
+    },
+    "devDependencies": {
+        "@types/node": "^0.0.2",
+        "@types/mocha": "^2.2.33",
+        "mocha": "^3.2.0",
+        "tslint": "^4.0.2",
+        "typescript": "^2.0.10",
+        "vscode": "^1.0.3"
+    }
+}
