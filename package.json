@@ -1,6 +1,6 @@
 {
     "name": "toggle-excluded-files",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "author": {
         "name": "Eric Amodio",
         "email": "eamodio@gmail.com"
@@ -27,7 +27,7 @@
         "theme": "dark"
     },
     "icon": "images/icon.png",
-    "preview": true,
+    "preview": false,
     "homepage": "https://github.com/eamodio/vscode-toggle-excluded-files/blob/master/README.md",
     "bugs": {
         "url": "https://github.com/eamodio/vscode-toggle-excluded-files/issues"
@@ -105,11 +105,11 @@
         "lodash.isequal": "^4.4.0"
     },
     "devDependencies": {
-        "@types/node": "^0.0.2",
+        "@types/node": "^6.0.52",
         "@types/mocha": "^2.2.33",
         "mocha": "^3.2.0",
-        "tslint": "^4.0.2",
-        "typescript": "^2.0.10",
+        "tslint": "^4.1.1",
+        "typescript": "^2.1.4",
         "vscode": "^1.0.3"
     }
 }
