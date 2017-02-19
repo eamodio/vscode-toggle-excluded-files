@@ -1,5 +1,9 @@
 ## Release Notes
 
+### 1.0.1
+
+- Updates the README and some dependencies
+
 ### 1.0.0
 
 - No longer preview since vscode 1.8 has been released

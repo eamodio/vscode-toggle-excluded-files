@@ -1,6 +1,16 @@
 # Toggle Excluded Files
 
-Toggles excluded (hidden) files visibility in the file explorer
+Quickly toggles excluded (hidden) files visibility in the file explorer.
+
+Excluded file are ones configured in your `settings.json`.
+
+### Example
+```
+    "files.exclude": {
+        "node_modules": true,
+        "out": true
+    }
+```
 
 ## Features
 
