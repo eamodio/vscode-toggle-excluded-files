@@ -2,9 +2,10 @@
 import { Objects } from './system';
 import { Disposable, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace } from 'vscode';
 import { IConfig } from './configuration';
-import { Commands } from './constants';
+import { Commands } from './commands';
 
 export default class StatusBarController extends Disposable {
+
     private _config: IConfig;
     private _disposable: Disposable;
     private _statusBarItem: StatusBarItem | undefined;
@@ -13,11 +14,11 @@ export default class StatusBarController extends Disposable {
     constructor(context: ExtensionContext) {
         super(() => this.dispose());
 
-        this._onConfigure();
+        this._onConfigurationChanged();
 
         const subscriptions: Disposable[] = [];
 
-        subscriptions.push(workspace.onDidChangeConfiguration(this._onConfigure, this));
+        subscriptions.push(workspace.onDidChangeConfiguration(this._onConfigurationChanged, this));
 
         this._disposable = Disposable.from(...subscriptions);
     }
@@ -28,7 +29,7 @@ export default class StatusBarController extends Disposable {
         this._disposable && this._disposable.dispose();
     }
 
-    private _onConfigure() {
+    private _onConfigurationChanged() {
         const config = workspace.getConfiguration('').get<IConfig>('toggleexcludedfiles');
 
         if (!Objects.areEquivalent(config.statusBar, this._config && this._config.statusBar)) {

@@ -1,34 +1,16 @@
 'use strict';
-import { Objects } from './system';
-import { commands, Disposable, workspace } from 'vscode';
-import { Commands } from './constants';
-import { Logger } from './logger';
+import { commands, Disposable } from 'vscode';
+import ExcludeController from './excludeController';
 
-async function applyExcludeConfiguration(fn: (state: boolean) => boolean) {
-    try {
-        const cfg = workspace.getConfiguration('');
-        const excluded = cfg.inspect('files.exclude');
-        if (excluded.globalValue) {
-            const apply = Object.create(null);
-            for (const [key, state] of Objects.entries(excluded.globalValue)) {
-                apply[key] = fn(state);
-            }
-            await cfg.update('files.exclude', apply, true);
-        }
-        if (excluded.workspaceValue) {
-            const apply = Object.create(null);
-            for (const [key, state] of Objects.entries(excluded.workspaceValue)) {
-                apply[key] = fn(state);
-            }
-            await cfg.update('files.exclude', apply, false);
-        }
-    }
-    catch (ex) {
-        Logger.error(ex);
-    }
-}
+export type Commands = 'toggleexcludedfiles.show' | 'toggleexcludedfiles.hide' | 'toggleexcludedfiles.toggle';
+export const Commands = {
+    Show: 'toggleexcludedfiles.show' as Commands,
+    Hide: 'toggleexcludedfiles.hide' as Commands,
+    Toggle: 'toggleexcludedfiles.toggle' as Commands
+};
 
 export abstract class Command extends Disposable {
+
     private _disposable: Disposable;
 
     constructor(command: Commands) {
@@ -45,33 +27,33 @@ export abstract class Command extends Disposable {
 
 export class HideCommand extends Command {
 
-    constructor() {
+    constructor(private exclude: ExcludeController) {
         super(Commands.Hide);
     }
 
     execute() {
-        return applyExcludeConfiguration(state => true);
+        return this.exclude.restoreConfiguration();
    }
 }
 
 export class ShowCommand extends Command {
 
-    constructor() {
+    constructor(private exclude: ExcludeController) {
         super(Commands.Show);
     }
 
     execute() {
-        return applyExcludeConfiguration(state => false);
+        return this.exclude.applyConfiguration();
     }
 }
 
 export class ToggleCommand extends Command {
 
-    constructor() {
+    constructor(private exclude: ExcludeController) {
         super(Commands.Toggle);
     }
 
     execute() {
-        return applyExcludeConfiguration(state => !state);
+        return this.exclude.toggleConfiguration();
     }
 }
