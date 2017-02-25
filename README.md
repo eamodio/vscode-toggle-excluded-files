@@ -2,7 +2,7 @@
 
 Quickly toggles excluded (hidden) files visibility in the file explorer.
 
-![GitLens preview 1](https://raw.githubusercontent.com/eamodio/vscode-toggle-excluded-files/master/images/preview.gif)
+![preview](https://raw.githubusercontent.com/eamodio/vscode-toggle-excluded-files/master/images/preview.gif)
 
 ## Features
 
