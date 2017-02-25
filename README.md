@@ -2,15 +2,7 @@
 
 Quickly toggles excluded (hidden) files visibility in the file explorer.
 
-Excluded file are ones configured in your `settings.json`.
-
-### Example
-```
-    "files.exclude": {
-        "node_modules": true,
-        "out": true
-    }
-```
+![GitLens preview 1](https://raw.githubusercontent.com/eamodio/vscode-toggle-excluded-files/master/images/preview.gif)
 
 ## Features
 
@@ -22,6 +14,18 @@ Excluded file are ones configured in your `settings.json`.
 |Name | Description
 |-----|------------
 |`toggleexcludedfiles.statusBar.enabled`|Specifies whether to show a toggle button in the status bar
+
+## VS Code excluded file settings
+
+Excluded files are configured in your `settings.json`.
+
+For example:
+```
+    "files.exclude": {
+        "node_modules": true,
+        "out": true
+    }
+```
 
 ## Known Issues
 
