@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.1.2
+- Fixes intermittent issue with restoring the previous exclude rules
+
 ### 1.1.1
 - Fixes logging to clean up on extension deactivate
 
