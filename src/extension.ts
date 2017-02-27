@@ -2,10 +2,13 @@
 import { ExtensionContext } from 'vscode';
 import { HideCommand, ShowCommand, ToggleCommand } from './commands';
 import ExcludeController from './excludeController';
+import { Logger } from './logger';
 import StatusBarController from './statusBarController';
 
 // this method is called when your extension is activated
 export async function activate(context: ExtensionContext) {
+    Logger.configure(context);
+
     const statusBarController = new StatusBarController(context);
     context.subscriptions.push(statusBarController);
 
