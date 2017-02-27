@@ -78,6 +78,7 @@ export default class ExcludeController extends Disposable {
         }
         catch (ex) {
             Logger.error(ex);
+            this.clearExcludeConfiguration();
         }
     }
 
@@ -88,16 +89,22 @@ export default class ExcludeController extends Disposable {
         try {
             const savedExclude = this.getSavedExcludeConfiguration();
 
-            this._ignoreConfigurationChange = true;
-            const cfg = workspace.getConfiguration('');
-            await cfg.update('files.exclude', savedExclude.globalValue, true);
-            await cfg.update('files.exclude', savedExclude.workspaceValue, false);
+            const current = this.getExcludeConfiguration();
+            if (current.globalValue !== savedExclude.globalValue) {
+                this._ignoreConfigurationChange = true;
+                await workspace.getConfiguration('').update('files.exclude', savedExclude.globalValue, true);
+            }
+            if (current.workspaceValue !== savedExclude.workspaceValue) {
+                this._ignoreConfigurationChange = true;
+                await workspace.getConfiguration('').update('files.exclude', savedExclude.workspaceValue, false);
+            }
 
             // Remove the currently saved config, since we just restored it
             this.clearExcludeConfiguration();
         }
         catch (ex) {
             Logger.error(ex);
+            this.clearExcludeConfiguration();
         }
     }
 
