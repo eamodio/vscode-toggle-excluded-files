@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.1.3
+- Fixes issue with output channel logging
+
 ### 1.1.2
 - Fixes intermittent issue with restoring the previous exclude rules
 
