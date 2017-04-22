@@ -5,7 +5,7 @@
 
 Quickly toggles excluded (hidden) files visibility in the file explorer.
 
-  > Excluded files are configured in your `settings.json`
+  > Excluded files are configured in your [`settings.json`](https://code.visualstudio.com/docs/getstarted/settings#_copy-of-default-settings)
   > ```json
   > "files.exclude": {
   >     "node_modules": true,
