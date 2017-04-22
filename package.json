@@ -47,12 +47,12 @@
                     "default": true,
                     "description": "Specifies whether to show a toggle button in the status bar"
                 },
-                "toggleexcludedfiles.advanced.debug": {
+                "toggleexcludedfiles.debug": {
                     "type": "boolean",
                     "default": false,
                     "description": "Specifies debug mode"
                 },
-                "toggleexcludedfiles.advanced.output.level": {
+                "toggleexcludedfiles.outputLevel": {
                     "type": "string",
                     "default": "silent",
                     "enum": [
@@ -67,17 +67,17 @@
         "commands": [
             {
                 "command": "toggleexcludedfiles.show",
-                "title": "Show Excluded Files in Explorer",
+                "title": "Show Excluded Files",
                 "category": "Files"
             },
             {
-                "command": "toggleexcludedfiles.hide",
-                "title": "Hide Excluded Files in Explorer",
+                "command": "toggleexcludedfiles.restore",
+                "title": "Restore Excluded Files",
                 "category": "Files"
             },
             {
                 "command": "toggleexcludedfiles.toggle",
-                "title": "Toggle Excluded Files in Explorer",
+                "title": "Toggle Excluded Files",
                 "category": "Files"
             }
         ],
@@ -86,7 +86,7 @@
                 "command": "toggleexcludedfiles.toggle",
                 "key": "ctrl+shift+a",
                 "mac": "cmd+shift+a",
-                "when": "!editorFocus"
+                "when": "filesExplorerFocus"
             }
         ]
     },

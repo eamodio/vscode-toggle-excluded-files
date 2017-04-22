@@ -3,32 +3,33 @@
 [![](https://vsmarketplacebadge.apphb.com/rating/eamodio.toggle-excluded-files.svg)](https://marketplace.visualstudio.com/items?itemName=eamodio.toggle-excluded-files)
 # Toggle Excluded Files
 
-Quickly toggles excluded (hidden) files visibility in the file explorer.
+Quickly toggles excluded (hidden) files visibility in the file explorer
+
+  > Excluded files are configured in your `settings.json`
+  > ```json
+  > "files.exclude": {
+  >     "node_modules": true,
+  >     "out": true
+  > }
+  > ```
 
 ![preview](https://raw.githubusercontent.com/eamodio/vscode-toggle-excluded-files/master/images/preview.gif)
 
 ## Features
 
-- Provides commands to hide, show, and toggle excluded file visibility
-- Provides (an optional) status bar button to toggle excluded file visibility
+- Adds a `Toggle Excluded Files` command (`toggleexcludedfiles.toggle`) with a shortcut of `ctrl+shift+a` (`cmd+shift+a` on macOS) to either show or restore the current visibility of excluded files in the file explorer
+
+- Adds a **status bar button** to toggle the excluded file visibility ([optional](#extension-settings), on by default)
+
+- Adds a `Show Excluded Files` command (`toggleexcludedfiles.show`) to show excluded files in the file explorer
+
+- Adds a `Restore Excluded Files` command (`toggleexcludedfiles.restore`) to restore (hide) excluded files in the file explorer
 
 ## Extension Settings
 
 |Name | Description
 |-----|------------
 |`toggleexcludedfiles.statusBar.enabled`|Specifies whether to show a toggle button in the status bar
-
-## VS Code excluded file settings
-
-Excluded files are configured in your `settings.json`.
-
-For example:
-```
-    "files.exclude": {
-        "node_modules": true,
-        "out": true
-    }
-```
 
 ## Known Issues
 

@@ -1,17 +1,19 @@
 'use strict';
 import { Objects } from './system';
 import { Disposable, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace } from 'vscode';
-import { IConfig } from './configuration';
 import { Commands } from './commands';
+import { IConfig } from './configuration';
+import { ExtensionKey } from './constants';
+import { FilesExcludeController } from './excludeController';
 
-export default class StatusBarController extends Disposable {
+export class StatusBarController extends Disposable {
 
     private _config: IConfig;
     private _disposable: Disposable;
     private _statusBarItem: StatusBarItem | undefined;
     private _statusBarDisposable: Disposable | undefined;
 
-    constructor(context: ExtensionContext) {
+    constructor(context: ExtensionContext, private filesExclude: FilesExcludeController) {
         super(() => this.dispose());
 
         this._onConfigurationChanged();
@@ -19,6 +21,7 @@ export default class StatusBarController extends Disposable {
         const subscriptions: Disposable[] = [];
 
         subscriptions.push(workspace.onDidChangeConfiguration(this._onConfigurationChanged, this));
+        subscriptions.push(filesExclude.onDidToggle(this._onExcludeToggled, this));
 
         this._disposable = Disposable.from(...subscriptions);
     }
@@ -30,16 +33,17 @@ export default class StatusBarController extends Disposable {
     }
 
     private _onConfigurationChanged() {
-        const config = workspace.getConfiguration('').get<IConfig>('toggleexcludedfiles');
+        const config = workspace.getConfiguration().get<IConfig>(ExtensionKey);
 
-        if (!Objects.areEquivalent(config.statusBar, this._config && this._config.statusBar)) {
+        const canToggle = this.filesExclude.canToggle;
+        if (!Objects.areEquivalent(config.statusBar, this._config && this._config.statusBar) ||
+            (canToggle && this._statusBarItem === undefined) || (!canToggle && this._statusBarItem !== undefined)) {
             this._statusBarItem && this._statusBarItem.dispose();
 
-            if (config.statusBar.enabled) {
+            if (config.statusBar.enabled && canToggle) {
                 this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 0);
                 this._statusBarItem.command = Commands.Toggle;
-                this._statusBarItem.text = `$(eye)`;
-                this._statusBarItem.tooltip = 'Toggle Excluded Files in Explorer';
+                this.updateStatusBarItem(this.filesExclude.toggled);
                 this._statusBarItem.show();
             }
             else {
@@ -48,5 +52,16 @@ export default class StatusBarController extends Disposable {
         }
 
         this._config = config;
+    }
+
+    private updateStatusBarItem(toggled: boolean) {
+        this._statusBarItem.text = toggled ? '$(eye)\u2022' : '$(eye)';
+        this._statusBarItem.tooltip = `${toggled ? 'Restore' : 'Show'} Excluded Files`;
+    }
+
+    private _onExcludeToggled() {
+        if (!this._statusBarItem) return;
+
+        this.updateStatusBarItem(this.filesExclude.toggled);
     }
 }

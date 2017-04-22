@@ -5,14 +5,8 @@ export interface IStatusBarConfig {
     enabled: boolean;
 }
 
-export interface IAdvancedConfig {
-    debug: boolean;
-    output: {
-        level: OutputLevel;
-    };
-}
-
 export interface IConfig {
+    debug: boolean;
+    outputLevel: OutputLevel;
     statusBar: IStatusBarConfig;
-    advanced: IAdvancedConfig;
 }

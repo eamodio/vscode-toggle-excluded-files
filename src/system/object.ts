@@ -1,5 +1,4 @@
 'use strict';
-//import { isEqual as _isEqual } from 'lodash';
 const _isEqual = require('lodash.isequal');
 
 export namespace Objects {

@@ -1,24 +1,29 @@
 'use strict';
 import { Objects } from './system';
-import { Disposable, ExtensionContext, workspace } from 'vscode';
+import { Disposable, Event, EventEmitter, ExtensionContext, workspace } from 'vscode';
+import { WorkspaceState } from './constants';
 import { Logger } from './logger';
 
 interface IConfigInspect {
     key: string;
-    defaultValue?: {};
-    globalValue?: {};
-    workspaceValue?: {};
+    defaultValue?: { [id: string]: any };
+    globalValue?: { [id: string]: any };
+    workspaceValue?: { [id: string]: any };
 };
 
-export default class ExcludeController extends Disposable {
+abstract class ExcludeControllerBase extends Disposable {
+
+    private _onDidToggle = new EventEmitter<void>();
+    get onDidToggle(): Event<void> {
+        return this._onDidToggle.event;
+    }
 
     private _disposable: Disposable;
-    private _ignoreConfigurationChange: boolean;
+    private _working: boolean;
 
     constructor(private context: ExtensionContext) {
         super(() => this.dispose());
 
-        this._ignoreConfigurationChange = true;
         this._onConfigurationChanged();
 
         const subscriptions: Disposable[] = [];
@@ -32,105 +37,198 @@ export default class ExcludeController extends Disposable {
         this._disposable && this._disposable.dispose();
     }
 
-    private _onConfigurationChanged() {
-        if (!this._ignoreConfigurationChange) {
-            const savedExclude = this.getSavedExcludeConfiguration();
-            if (savedExclude) {
-                const newExclude = this.getExcludeConfiguration();
-                if (!Objects.areEquivalent(savedExclude, newExclude)) {
-                    // Remove the currently saved config, since it was directly edited
-                    this.clearExcludeConfiguration();
-                }
-            }
-        }
+    protected abstract get section(): string;
+    protected abstract get appliedState(): WorkspaceState;
+    protected abstract get savedState(): WorkspaceState;
 
-        this._ignoreConfigurationChange = false;
+    private _onConfigurationChanged() {
+        if (this._working) return;
+
+        const savedExclude = this.getSavedExcludeConfiguration();
+        if (!savedExclude) return;
+
+        Logger.log('_onConfigurationChanged');
+
+        const newExclude = this.getExcludeConfiguration();
+        if (Objects.areEquivalent(savedExclude.globalValue, newExclude.globalValue) && Objects.areEquivalent(savedExclude.workspaceValue, newExclude.workspaceValue)) return;
+
+        const appliedExclude = this.getAppliedExcludeConfiguration();
+        if (Objects.areEquivalent(appliedExclude.globalValue, newExclude.globalValue) && Objects.areEquivalent(appliedExclude.workspaceValue, newExclude.workspaceValue)) return;
+
+        Logger.log('onConfigurationChanged', 'clearing state');
+
+        // Remove the currently saved config, since it was directly edited
+        this.clearExcludeConfiguration();
     }
 
     async applyConfiguration() {
         // If we have saved state, the we are already applied to exit
-        if (this.hasSavedExcludeConfiguration()) return;
+        if (this._working || this.hasSavedExcludeConfiguration()) return;
+
+        Logger.log(`applyConfiguration('${this.section}')`);
 
         try {
+            this._working = true;
+
             const exclude = this.getExcludeConfiguration();
             this.saveExcludeConfiguration(exclude);
 
-            const cfg = workspace.getConfiguration('');
+            const appliedExclude: IConfigInspect = {
+                key: exclude.key,
+                globalValue: exclude.globalValue === undefined ? undefined : {},
+                workspaceValue: exclude.workspaceValue === undefined ? undefined : {}
+            };
+
+            const promises: Thenable<void>[] = [];
+
+            const cfg = workspace.getConfiguration();
             if (exclude.globalValue) {
                 const apply = Object.create(null);
                 for (const [key] of Objects.entries(exclude.globalValue)) {
-                    apply[key] = false;
+                    appliedExclude.globalValue[key] = apply[key] = false;
                 }
 
-                this._ignoreConfigurationChange = true;
-                await cfg.update('files.exclude', apply, true);
+                promises.push(cfg.update(this.section, apply, true));
             }
 
             if (exclude.workspaceValue) {
                 const apply = Object.create(null);
                 for (const [key] of Objects.entries(exclude.workspaceValue)) {
-                    apply[key] = false;
+                    appliedExclude.workspaceValue[key] = apply[key] = false;
                 }
 
-                this._ignoreConfigurationChange = true;
-                await cfg.update('files.exclude', apply, false);
+                promises.push(cfg.update(this.section, apply, false));
             }
+
+            this.saveAppliedExcludeConfiguration(appliedExclude);
+
+            if (!promises.length) return;
+
+            // Since for some reason reading a config even after awaiting an update doesn't alway give the updated value (vscode bug?)
+            // wait for the change event (with a timeout of 2s)
+            promises.push(new Promise<void>((resolve, reject) => {
+                workspace.onDidChangeConfiguration(resolve);
+                setTimeout(resolve, 2000);
+            }));
+
+            await Promise.all(promises);
         }
         catch (ex) {
             Logger.error(ex);
             this.clearExcludeConfiguration();
+        }
+        finally {
+            Logger.log(`applyConfiguration('${this.section}')`, 'done');
+
+            this._working = false;
+            this._onDidToggle.fire();
         }
     }
 
     async restoreConfiguration() {
         // If we don't have saved state, the we don't have anything to restore so exit
-        if (!this.hasSavedExcludeConfiguration()) return;
+        if (this._working || !this.hasSavedExcludeConfiguration()) return;
+
+        Logger.log(`restoreConfiguration('${this.section}')`);
 
         try {
+            this._working = true;
             const savedExclude = this.getSavedExcludeConfiguration();
 
-            const current = this.getExcludeConfiguration();
-            if (current.globalValue !== savedExclude.globalValue) {
-                this._ignoreConfigurationChange = true;
-                await workspace.getConfiguration('').update('files.exclude', savedExclude.globalValue, true);
+            const promises: Thenable<void>[] = [];
+
+            if (savedExclude.globalValue !== undefined) {
+                promises.push(workspace.getConfiguration().update(this.section, savedExclude.globalValue, true));
             }
-            if (current.workspaceValue !== savedExclude.workspaceValue) {
-                this._ignoreConfigurationChange = true;
-                await workspace.getConfiguration('').update('files.exclude', savedExclude.workspaceValue, false);
+            if (savedExclude.workspaceValue !== undefined) {
+                promises.push(workspace.getConfiguration().update(this.section, savedExclude.workspaceValue, false));
             }
 
             // Remove the currently saved config, since we just restored it
             this.clearExcludeConfiguration();
+
+            if (!promises.length) return;
+
+            // Since for some reason reading a config even after awaiting an update doesn't alway give the updated value (vscode bug?)
+            // wait for the change event (with a timeout of 2s)
+            promises.push(new Promise<void>((resolve, reject) => {
+                workspace.onDidChangeConfiguration(resolve);
+                setTimeout(resolve, 2000);
+            }));
+
+            await Promise.all(promises);
         }
         catch (ex) {
             Logger.error(ex);
             this.clearExcludeConfiguration();
         }
+        finally {
+            Logger.log(`restoreConfiguration('${this.section}')`, 'done');
+
+            this._working = false;
+            this._onDidToggle.fire();
+        }
     }
 
     async toggleConfiguration() {
+        if (this._working) return;
+
+        Logger.log(`toggleConfiguration('${this.section}')`);
+
         return this.hasSavedExcludeConfiguration()
             ? this.restoreConfiguration()
             : this.applyConfiguration();
     }
 
+    get canToggle() {
+        const exclude = this.getExcludeConfiguration();
+        return exclude.globalValue !== undefined || exclude.workspaceValue !== undefined;
+    }
+
+    get toggled() {
+        return this.hasSavedExcludeConfiguration();
+    }
+
     private clearExcludeConfiguration() {
+        this.saveAppliedExcludeConfiguration(undefined);
         this.saveExcludeConfiguration(undefined);
     }
 
     private getExcludeConfiguration(): IConfigInspect {
-        return workspace.getConfiguration('').inspect('files.exclude');
+        return workspace.getConfiguration().inspect(this.section);
+    }
+
+    private getAppliedExcludeConfiguration(): IConfigInspect {
+        return this.context.workspaceState.get<IConfigInspect>(this.appliedState);
     }
 
     private getSavedExcludeConfiguration(): IConfigInspect {
-        return this.context.workspaceState.get<IConfigInspect>('toggleexcludedfiles:state');
+        return this.context.workspaceState.get<IConfigInspect>(this.savedState);
     }
 
     private hasSavedExcludeConfiguration(): boolean {
-        return !!this.getSavedExcludeConfiguration();
+        return this.getSavedExcludeConfiguration() !== undefined;
+    }
+
+    private saveAppliedExcludeConfiguration(excluded: IConfigInspect | undefined): void {
+        this.context.workspaceState.update(this.appliedState, excluded);
     }
 
     private saveExcludeConfiguration(excluded: IConfigInspect | undefined): void {
-        this.context.workspaceState.update('toggleexcludedfiles:state', excluded);
+        this.context.workspaceState.update(this.savedState, excluded);
+    }
+}
+
+export class FilesExcludeController extends ExcludeControllerBase {
+    protected get section(): string {
+        return 'files.exclude';
+    }
+
+    protected get appliedState(): WorkspaceState {
+        return WorkspaceState.AppliedState;
+    }
+
+    protected get savedState(): WorkspaceState {
+        return WorkspaceState.SavedState;
     }
 }
