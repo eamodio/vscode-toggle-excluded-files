@@ -1,5 +1,14 @@
 ## Release Notes
 
+### 1.5.0
+- Adds current toggle state (`Show` vs `Restore`) to the status bar button
+- Adds folder (workspace) detection to disable of Toggle Exclude Files if a folder (workspace) is not loaded
+- Changes status bar button to only appear if `files.exclude` is in use (either in user or workspace settings)
+- Changes shortcut key for the `Toggle Excluded Files` command to only work when the file explorer is focused
+- Renames `toggleexcludedfiles.advanced.debug` setting to `toggleexcludedfiles.debug`
+- Renames `toggleexcludedfiles.output.level` setting to `toggleexcludedfiles.outputLevel`
+- Fixes intermittent issue where restoring existing exclude rules failed
+
 ### 1.1.3
 - Fixes issue with output channel logging
 

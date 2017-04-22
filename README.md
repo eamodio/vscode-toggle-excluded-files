@@ -20,6 +20,7 @@ Quickly toggles excluded (hidden) files visibility in the file explorer
 - Adds a `Toggle Excluded Files` command (`toggleexcludedfiles.toggle`) with a shortcut of `ctrl+shift+a` (`cmd+shift+a` on macOS) to either show or restore the current visibility of excluded files in the file explorer
 
 - Adds a **status bar button** to toggle the excluded file visibility ([optional](#extension-settings), on by default)
+  - An indicator icon will show when the exclude visibility is currently toggled
 
 - Adds a `Show Excluded Files` command (`toggleexcludedfiles.show`) to show excluded files in the file explorer
 
@@ -29,7 +30,7 @@ Quickly toggles excluded (hidden) files visibility in the file explorer
 
 |Name | Description
 |-----|------------
-|`toggleexcludedfiles.statusBar.enabled`|Specifies whether to show a toggle button in the status bar
+|`toggleexcludedfiles.statusBar.enabled`|Specifies whether to show the toggle button in the status bar
 
 ## Known Issues
 
