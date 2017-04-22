@@ -3,7 +3,7 @@
 [![](https://vsmarketplacebadge.apphb.com/rating/eamodio.toggle-excluded-files.svg)](https://marketplace.visualstudio.com/items?itemName=eamodio.toggle-excluded-files)
 # Toggle Excluded Files
 
-Quickly toggles excluded (hidden) files visibility in the file explorer
+Quickly toggles excluded (hidden) files visibility in the file explorer.
 
   > Excluded files are configured in your `settings.json`
   > ```json
