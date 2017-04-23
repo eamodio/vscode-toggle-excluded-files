@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.5.1
+- Fixes marketplace badge layout
+
 ### 1.5.0
 - Adds current toggle state (`Show` vs `Restore`) to the status bar button
 - Adds folder (workspace) detection to disable of Toggle Exclude Files if a folder (workspace) is not loaded
