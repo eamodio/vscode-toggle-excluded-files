@@ -2,6 +2,7 @@
 
 export const ExtensionId = 'toggle-excluded-files';
 export const ExtensionKey = 'toggleexcludedfiles';
+export const ExtensionOutputChannelName = 'ToggleExcludedFiles';
 export const QualifiedExtensionId = `eamodio.${ExtensionId}`;
 
 export type BuiltInCommands = 'vscode.open' | 'setContext';
