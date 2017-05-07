@@ -109,13 +109,6 @@ abstract class ExcludeControllerBase extends Disposable {
 
             if (!promises.length) return;
 
-            // Since for some reason reading a config even after awaiting an update doesn't alway give the updated value (vscode bug?)
-            // wait for the change event (with a timeout of 2s)
-            promises.push(new Promise<void>((resolve, reject) => {
-                workspace.onDidChangeConfiguration(resolve);
-                setTimeout(resolve, 2000);
-            }));
-
             await Promise.all(promises);
         }
         catch (ex) {
@@ -155,13 +148,6 @@ abstract class ExcludeControllerBase extends Disposable {
             this.clearExcludeConfiguration();
 
             if (!promises.length) return;
-
-            // Since for some reason reading a config even after awaiting an update doesn't alway give the updated value (vscode bug?)
-            // wait for the change event (with a timeout of 2s)
-            promises.push(new Promise<void>((resolve, reject) => {
-                workspace.onDidChangeConfiguration(resolve);
-                setTimeout(resolve, 2000);
-            }));
 
             await Promise.all(promises);
         }
