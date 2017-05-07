@@ -1,5 +1,8 @@
 ## Release Notes
 
+### 1.6.0
+- Removes hack now that [vscode #25508](https://github.com/Microsoft/vscode/issues/25508) as been resolved
+
 ### 1.5.1
 - Fixes marketplace badge layout
 
