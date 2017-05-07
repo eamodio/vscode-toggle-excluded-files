@@ -1,6 +1,7 @@
 'use strict';
-import { commands, Disposable } from 'vscode';
+import { commands, Disposable, TextDocumentShowOptions, TextEditor, Uri, window, workspace } from 'vscode';
 import { BuiltInCommands } from '../constants';
+import { Logger } from '../logger';
 
 export type Commands = 'toggleexcludedfiles.restore' | 'toggleexcludedfiles.show' | 'toggleexcludedfiles.toggle';
 export const Commands = {
@@ -32,4 +33,21 @@ export abstract class Command extends Disposable {
     }
 
     abstract execute(...args: any[]): any;
+}
+
+export async function openEditor(uri: Uri, options?: TextDocumentShowOptions): Promise<TextEditor | undefined> {
+    try {
+        const defaults: TextDocumentShowOptions = {
+            preserveFocus: false,
+            preview: true,
+            viewColumn: (window.activeTextEditor && window.activeTextEditor.viewColumn) || 1
+        };
+
+        const document = await workspace.openTextDocument(uri);
+        return window.showTextDocument(document, { ...defaults, ...(options || {}) });
+    }
+    catch (ex) {
+        Logger.error(ex, 'openEditor');
+        return undefined;
+    }
 }

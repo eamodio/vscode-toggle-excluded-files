@@ -5,11 +5,11 @@ import { WorkspaceState } from './constants';
 import { Logger } from './logger';
 
 interface IConfigInspect {
-    key: string;
+    key: string | undefined;
     defaultValue?: { [id: string]: any };
     globalValue?: { [id: string]: any };
     workspaceValue?: { [id: string]: any };
-};
+}
 
 abstract class ExcludeControllerBase extends Disposable {
 
@@ -45,15 +45,20 @@ abstract class ExcludeControllerBase extends Disposable {
         if (this._working) return;
 
         const savedExclude = this.getSavedExcludeConfiguration();
-        if (!savedExclude) return;
+        if (savedExclude === undefined) return;
 
         Logger.log('_onConfigurationChanged');
 
         const newExclude = this.getExcludeConfiguration();
-        if (Objects.areEquivalent(savedExclude.globalValue, newExclude.globalValue) && Objects.areEquivalent(savedExclude.workspaceValue, newExclude.workspaceValue)) return;
+        if (newExclude !== undefined &&
+            Objects.areEquivalent(savedExclude.globalValue, newExclude.globalValue) &&
+            Objects.areEquivalent(savedExclude.workspaceValue, newExclude.workspaceValue)) return;
 
         const appliedExclude = this.getAppliedExcludeConfiguration();
-        if (Objects.areEquivalent(appliedExclude.globalValue, newExclude.globalValue) && Objects.areEquivalent(appliedExclude.workspaceValue, newExclude.workspaceValue)) return;
+        if (newExclude !== undefined &&
+            appliedExclude !== undefined &&
+            Objects.areEquivalent(appliedExclude.globalValue, newExclude.globalValue) &&
+            Objects.areEquivalent(appliedExclude.workspaceValue, newExclude.workspaceValue)) return;
 
         Logger.log('onConfigurationChanged', 'clearing state');
 
@@ -74,27 +79,27 @@ abstract class ExcludeControllerBase extends Disposable {
             this.saveExcludeConfiguration(exclude);
 
             const appliedExclude: IConfigInspect = {
-                key: exclude.key,
-                globalValue: exclude.globalValue === undefined ? undefined : {},
-                workspaceValue: exclude.workspaceValue === undefined ? undefined : {}
+                key: exclude === undefined ? undefined : exclude.key,
+                globalValue: (exclude === undefined || exclude.globalValue === undefined) ? undefined : {},
+                workspaceValue: (exclude === undefined || exclude.workspaceValue === undefined) ? undefined : {}
             };
 
             const promises: Thenable<void>[] = [];
 
             const cfg = workspace.getConfiguration();
-            if (exclude.globalValue) {
+            if (exclude !== undefined && exclude.globalValue !== undefined) {
                 const apply = Object.create(null);
                 for (const [key] of Objects.entries(exclude.globalValue)) {
-                    appliedExclude.globalValue[key] = apply[key] = false;
+                    (appliedExclude.globalValue as any)[key] = apply[key] = false;
                 }
 
                 promises.push(cfg.update(this.section, apply, true));
             }
 
-            if (exclude.workspaceValue) {
+            if (exclude !== undefined && exclude.workspaceValue !== undefined) {
                 const apply = Object.create(null);
                 for (const [key] of Objects.entries(exclude.workspaceValue)) {
-                    appliedExclude.workspaceValue[key] = apply[key] = false;
+                    (appliedExclude.workspaceValue as any)[key] = apply[key] = false;
                 }
 
                 promises.push(cfg.update(this.section, apply, false));
@@ -137,11 +142,13 @@ abstract class ExcludeControllerBase extends Disposable {
 
             const promises: Thenable<void>[] = [];
 
-            if (savedExclude.globalValue !== undefined) {
-                promises.push(workspace.getConfiguration().update(this.section, savedExclude.globalValue, true));
-            }
-            if (savedExclude.workspaceValue !== undefined) {
-                promises.push(workspace.getConfiguration().update(this.section, savedExclude.workspaceValue, false));
+            if (savedExclude !== undefined) {
+                if (savedExclude.globalValue !== undefined) {
+                    promises.push(workspace.getConfiguration().update(this.section, savedExclude.globalValue, true));
+                }
+                if (savedExclude.workspaceValue !== undefined) {
+                    promises.push(workspace.getConfiguration().update(this.section, savedExclude.workspaceValue, false));
+                }
             }
 
             // Remove the currently saved config, since we just restored it
@@ -182,7 +189,7 @@ abstract class ExcludeControllerBase extends Disposable {
 
     get canToggle() {
         const exclude = this.getExcludeConfiguration();
-        return exclude.globalValue !== undefined || exclude.workspaceValue !== undefined;
+        return exclude !== undefined && (exclude.globalValue !== undefined || exclude.workspaceValue !== undefined);
     }
 
     get toggled() {
@@ -194,15 +201,15 @@ abstract class ExcludeControllerBase extends Disposable {
         this.saveExcludeConfiguration(undefined);
     }
 
-    private getExcludeConfiguration(): IConfigInspect {
+    private getExcludeConfiguration(): IConfigInspect | undefined {
         return workspace.getConfiguration().inspect(this.section);
     }
 
-    private getAppliedExcludeConfiguration(): IConfigInspect {
+    private getAppliedExcludeConfiguration(): IConfigInspect | undefined {
         return this.context.workspaceState.get<IConfigInspect>(this.appliedState);
     }
 
-    private getSavedExcludeConfiguration(): IConfigInspect {
+    private getSavedExcludeConfiguration(): IConfigInspect | undefined {
         return this.context.workspaceState.get<IConfigInspect>(this.savedState);
     }
 

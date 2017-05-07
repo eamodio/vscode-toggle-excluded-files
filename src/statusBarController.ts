@@ -33,14 +33,15 @@ export class StatusBarController extends Disposable {
     }
 
     private _onConfigurationChanged() {
-        const config = workspace.getConfiguration().get<IConfig>(ExtensionKey);
+        const cfg = workspace.getConfiguration().get<IConfig>(ExtensionKey);
+        if (cfg === undefined) return;
 
         const canToggle = this.filesExclude.canToggle;
-        if (!Objects.areEquivalent(config.statusBar, this._config && this._config.statusBar) ||
+        if (!Objects.areEquivalent(cfg.statusBar, this._config && this._config.statusBar) ||
             (canToggle && this._statusBarItem === undefined) || (!canToggle && this._statusBarItem !== undefined)) {
             this._statusBarItem && this._statusBarItem.dispose();
 
-            if (config.statusBar.enabled && canToggle) {
+            if (cfg.statusBar.enabled && canToggle) {
                 this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 0);
                 this._statusBarItem.command = Commands.Toggle;
                 this.updateStatusBarItem(this.filesExclude.toggled);
@@ -51,10 +52,12 @@ export class StatusBarController extends Disposable {
             }
         }
 
-        this._config = config;
+        this._config = cfg;
     }
 
     private updateStatusBarItem(toggled: boolean) {
+        if (this._statusBarItem === undefined) return;
+
         this._statusBarItem.text = toggled ? '$(eye)\u2022' : '$(eye)';
         this._statusBarItem.tooltip = `${toggled ? 'Restore' : 'Show'} Excluded Files`;
     }
