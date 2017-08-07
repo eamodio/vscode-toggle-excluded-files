@@ -7,7 +7,7 @@ export namespace Objects {
     }
 
     export function* entries(o: any): IterableIterator<[string, any]> {
-        for (let key in o) {
+        for (const key in o) {
             yield [key, o[key]];
         }
     }

@@ -7,7 +7,7 @@
     },
     "publisher": "eamodio",
     "engines": {
-        "vscode": "^1.12.0"
+        "vscode": "^1.14.0"
     },
     "license": "SEE LICENSE IN LICENSE",
     "displayName": "Toggle Excluded Files",
@@ -95,12 +95,14 @@
         "*"
     ],
     "scripts": {
-        "compile": "npm run lint && tsc -p ./",
+        "clean": "git clean -xdf",
+        "compile": "tslint --project tslint.json && tsc -p ./",
         "watch": "tsc -watch -p ./",
         "lint": "tslint --project tslint.json",
         "pack": "git clean -xdf --exclude=node_modules/ && vsce package",
         "postinstall": "node ./node_modules/vscode/bin/install",
         "pub": "git clean -xdf && vsce publish",
+        "reset": "git clean -xdf && npm install",
         "vscode:prepublish": "npm install && npm run compile"
     },
     "dependencies": {
@@ -108,10 +110,10 @@
     },
     "devDependencies": {
         "@types/mocha": "2.2.41",
-        "@types/node": "7.0.18",
-        "mocha": "3.3.0",
-        "tslint": "5.2.0",
-        "typescript": "2.3.2",
-        "vscode": "1.1.0"
+        "@types/node": "8.0.19",
+        "mocha": "3.5.0",
+        "tslint": "5.5.0",
+        "typescript": "2.4.2",
+        "vscode": "1.1.4"
     }
 }
