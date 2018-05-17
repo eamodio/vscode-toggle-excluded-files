@@ -19,7 +19,7 @@ abstract class ExcludeControllerBase extends Disposable {
     }
 
     private _disposable: Disposable;
-    private _working: boolean;
+    private _working: boolean = false;
 
     constructor(private context: ExtensionContext) {
         super(() => this.dispose());
