@@ -1,8 +1,9 @@
 'use strict';
-import { Objects } from './system';
-import { Disposable, Event, EventEmitter, ExtensionContext, workspace } from 'vscode';
+import { Disposable, Event, EventEmitter, workspace } from 'vscode';
 import { WorkspaceState } from './constants';
+import { Container } from './container';
 import { Logger } from './logger';
+import { Objects } from './system';
 
 interface IConfigInspect {
     key: string | undefined;
@@ -11,8 +12,7 @@ interface IConfigInspect {
     workspaceValue?: { [id: string]: any };
 }
 
-abstract class ExcludeControllerBase extends Disposable {
-
+abstract class ExcludeControllerBase implements Disposable {
     private _onDidToggle = new EventEmitter<void>();
     get onDidToggle(): Event<void> {
         return this._onDidToggle.event;
@@ -21,9 +21,7 @@ abstract class ExcludeControllerBase extends Disposable {
     private _disposable: Disposable;
     private _working: boolean = false;
 
-    constructor(private context: ExtensionContext) {
-        super(() => this.dispose());
-
+    constructor() {
         this._onConfigurationChanged();
 
         const subscriptions: Disposable[] = [];
@@ -50,15 +48,23 @@ abstract class ExcludeControllerBase extends Disposable {
         Logger.log('_onConfigurationChanged');
 
         const newExclude = this.getExcludeConfiguration();
-        if (newExclude !== undefined &&
+        if (
+            newExclude !== undefined &&
             Objects.areEquivalent(savedExclude.globalValue, newExclude.globalValue) &&
-            Objects.areEquivalent(savedExclude.workspaceValue, newExclude.workspaceValue)) return;
+            Objects.areEquivalent(savedExclude.workspaceValue, newExclude.workspaceValue)
+        ) {
+            return;
+        }
 
         const appliedExclude = this.getAppliedExcludeConfiguration();
-        if (newExclude !== undefined &&
+        if (
+            newExclude !== undefined &&
             appliedExclude !== undefined &&
             Objects.areEquivalent(appliedExclude.globalValue, newExclude.globalValue) &&
-            Objects.areEquivalent(appliedExclude.workspaceValue, newExclude.workspaceValue)) return;
+            Objects.areEquivalent(appliedExclude.workspaceValue, newExclude.workspaceValue)
+        ) {
+            return;
+        }
 
         Logger.log('onConfigurationChanged', 'clearing state');
 
@@ -80,8 +86,8 @@ abstract class ExcludeControllerBase extends Disposable {
 
             const appliedExclude: IConfigInspect = {
                 key: exclude === undefined ? undefined : exclude.key,
-                globalValue: (exclude === undefined || exclude.globalValue === undefined) ? undefined : {},
-                workspaceValue: (exclude === undefined || exclude.workspaceValue === undefined) ? undefined : {}
+                globalValue: exclude === undefined || exclude.globalValue === undefined ? undefined : {},
+                workspaceValue: exclude === undefined || exclude.workspaceValue === undefined ? undefined : {}
             };
 
             const promises: Thenable<void>[] = [];
@@ -140,7 +146,9 @@ abstract class ExcludeControllerBase extends Disposable {
                     promises.push(workspace.getConfiguration().update(this.section, savedExclude.globalValue, true));
                 }
                 if (savedExclude.workspaceValue !== undefined) {
-                    promises.push(workspace.getConfiguration().update(this.section, savedExclude.workspaceValue, false));
+                    promises.push(
+                        workspace.getConfiguration().update(this.section, savedExclude.workspaceValue, false)
+                    );
                 }
             }
 
@@ -168,9 +176,7 @@ abstract class ExcludeControllerBase extends Disposable {
 
         Logger.log(`toggleConfiguration('${this.section}')`);
 
-        return this.hasSavedExcludeConfiguration()
-            ? this.restoreConfiguration()
-            : this.applyConfiguration();
+        return this.hasSavedExcludeConfiguration() ? this.restoreConfiguration() : this.applyConfiguration();
     }
 
     get canToggle() {
@@ -192,11 +198,11 @@ abstract class ExcludeControllerBase extends Disposable {
     }
 
     private getAppliedExcludeConfiguration(): IConfigInspect | undefined {
-        return this.context.workspaceState.get<IConfigInspect>(this.appliedState);
+        return Container.context.workspaceState.get<IConfigInspect>(this.appliedState);
     }
 
     private getSavedExcludeConfiguration(): IConfigInspect | undefined {
-        return this.context.workspaceState.get<IConfigInspect>(this.savedState);
+        return Container.context.workspaceState.get<IConfigInspect>(this.savedState);
     }
 
     private hasSavedExcludeConfiguration(): boolean {
@@ -204,11 +210,11 @@ abstract class ExcludeControllerBase extends Disposable {
     }
 
     private saveAppliedExcludeConfiguration(excluded: IConfigInspect | undefined): void {
-        this.context.workspaceState.update(this.appliedState, excluded);
+        Container.context.workspaceState.update(this.appliedState, excluded);
     }
 
     private saveExcludeConfiguration(excluded: IConfigInspect | undefined): void {
-        this.context.workspaceState.update(this.savedState, excluded);
+        Container.context.workspaceState.update(this.savedState, excluded);
     }
 }
 

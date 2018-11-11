@@ -5,31 +5,38 @@
 // ${fileDirname}: the current opened file's dirname
 // ${fileExtname}: the current opened file's extension
 // ${cwd}: the current working directory of the spawned process
-
 // A task runner that calls a custom npm script that compiles the extension.
 {
     "version": "2.0.0",
-    "showOutput": "always",
+    "presentation": {
+        "echo": false,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": false
+    },
     "tasks": [
         {
-            "taskName": "compile",
-            "command": "npm run compile",
-            "isBuildCommand": true,
-            "isShellCommand": true,
-            "problemMatcher": [ "$tsc", "$tslint5" ]
+            "type": "npm",
+            "script": "build",
+            "group": "build",
+            "problemMatcher": ["$ts-webpack", "$tslint-webpack"]
         },
         {
-            "taskName": "lint",
-            "command": "npm run lint",
-            "isShellCommand": true,
-            "problemMatcher": "$tslint5"
+            "type": "npm",
+            "script": "lint",
+            "group": "build",
+            "problemMatcher": ["$tslint5"]
         },
         {
-            "taskName": "watch",
-            "command": "npm run watch",
+            "type": "npm",
+            "script": "watch",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "isBackground": true,
-            "isShellCommand": true,
-            "problemMatcher": "$tsc-watch"
+            "problemMatcher": ["$ts-webpack-watch", "$tslint-webpack-watch"]
         }
     ]
 }

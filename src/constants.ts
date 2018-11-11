@@ -1,18 +1,15 @@
 'use strict';
 
-export const ExtensionId = 'toggle-excluded-files';
-export const ExtensionKey = 'toggleexcludedfiles';
-export const ExtensionOutputChannelName = 'ToggleExcludedFiles';
-export const QualifiedExtensionId = `eamodio.${ExtensionId}`;
+export const extensionId = 'toggleexcludedfiles';
+export const extensionOutputChannelName = 'ToggleExcludedFiles';
+export const extensionQualifiedId = `eamodio.toggle-excluded-files`;
 
-export type BuiltInCommands = 'vscode.open' | 'setContext';
-export const BuiltInCommands = {
-    Open: 'vscode.open' as BuiltInCommands,
-    SetContext: 'setContext' as BuiltInCommands
-};
+export enum BuiltInCommands {
+    Open = 'vscode.open',
+    SetContext = 'setContext'
+}
 
-export type WorkspaceState = 'toggleexcludedfiles:appliedState' | 'toggleexcludedfiles:savedState';
-export const WorkspaceState = {
-    AppliedState: 'toggleexcludedfiles:appliedState' as WorkspaceState,
-    SavedState: 'toggleexcludedfiles:savedState' as WorkspaceState
-};
+export enum WorkspaceState {
+    AppliedState = 'toggleexcludedfiles:appliedState',
+    SavedState = 'toggleexcludedfiles:savedState'
+}

@@ -7,11 +7,18 @@
     },
     "publisher": "eamodio",
     "engines": {
-        "vscode": "^1.14.0"
+        "vscode": "^1.28.0"
     },
     "license": "SEE LICENSE IN LICENSE",
     "displayName": "Toggle Excluded Files",
     "description": "Quickly toggles excluded (hidden) files visibility in the file explorer",
+    "badges": [
+        {
+            "url": "https://img.shields.io/badge/chat-on%20slack-brightgreen.svg",
+            "href": "https://join.slack.com/t/vscode-dev-community/shared_invite/enQtMjIxOTgxNDE3NzM0LWU5M2ZiZDU1YjBlMzdlZjA2YjBjYzRhYTM5NTgzMTAxMjdiNWU0ZmQzYWI3MWU5N2Q1YjBiYmQ4MzY0NDE1MzY",
+            "description": "Join us in the #toggle-excluded-files channel"
+        }
+    ],
     "categories": [
         "Other"
     ],
@@ -37,7 +44,7 @@
         "type": "git",
         "url": "https://github.com/eamodio/vscode-toggle-excluded-files.git"
     },
-    "main": "./out/src/extension",
+    "main": "./dist/extension",
     "contributes": {
         "configuration": {
             "type": "object",
@@ -95,25 +102,37 @@
         "*"
     ],
     "scripts": {
-        "clean": "git clean -xdf",
-        "compile": "tslint --project tslint.json && tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "lint": "tslint --project tslint.json",
-        "pack": "git clean -xdf --exclude=node_modules/ && vsce package",
+        "build": "webpack --env.development",
+        "bundle": "webpack --env.production",
+        "clean": "git clean -Xdf -e !.cache-images",
+        "lint": "tslint --project tsconfig.json",
+        "pack": "vsce package",
+        "pretty": "prettier --config .prettierrc --loglevel warn --write \"./**/*.{ts,md,json}\" && tslint --project tsconfig.json --fix",
+        "pub": "vsce publish",
+        "rebuild": "npm run reset && npm run build",
+        "reset": "npm run clean && npm install --no-save",
+        "watch": "webpack --watch --env.development --info-verbosity verbose",
         "postinstall": "node ./node_modules/vscode/bin/install",
-        "pub": "git clean -xdf && vsce publish",
-        "reset": "git clean -xdf && npm install",
-        "vscode:prepublish": "npm install && npm run compile"
+        "vscode:prepublish": "npm run reset && npm run bundle"
     },
     "dependencies": {
-        "lodash.isequal": "4.5.0"
+        "lodash-es": "4.17.11"
     },
     "devDependencies": {
-        "@types/mocha": "2.2.41",
-        "@types/node": "8.0.19",
-        "mocha": "3.5.0",
-        "tslint": "5.5.0",
-        "typescript": "2.4.2",
-        "vscode": "1.1.4"
+        "@types/lodash-es": "4.17.1",
+        "@types/node": "8.10.37",
+        "clean-webpack-plugin": "0.1.19",
+        "prettier": "1.15.2",
+        "prettier-tslint": "0.4.0",
+        "terser-webpack-plugin": "1.1.0",
+        "tslint": "5.11.0",
+        "tslint-loader": "3.5.4",
+        "tslint-prettiest": "0.0.1",
+        "ts-loader": "5.3.0",
+        "typescript": "3.1.6",
+        "vsce": "1.53.0",
+        "vscode": "1.1.21",
+        "webpack": "4.25.1",
+        "webpack-cli": "3.1.2"
     }
 }
