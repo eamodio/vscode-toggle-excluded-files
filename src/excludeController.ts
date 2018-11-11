@@ -22,11 +22,11 @@ abstract class ExcludeControllerBase implements Disposable {
     private _working: boolean = false;
 
     constructor() {
-        this._onConfigurationChanged();
+        this.onConfigurationChanged();
 
         const subscriptions: Disposable[] = [];
 
-        subscriptions.push(workspace.onDidChangeConfiguration(this._onConfigurationChanged, this));
+        subscriptions.push(workspace.onDidChangeConfiguration(this.onConfigurationChanged, this));
 
         this._disposable = Disposable.from(...subscriptions);
     }
@@ -39,13 +39,13 @@ abstract class ExcludeControllerBase implements Disposable {
     protected abstract get appliedState(): WorkspaceState;
     protected abstract get savedState(): WorkspaceState;
 
-    private _onConfigurationChanged() {
+    private onConfigurationChanged() {
         if (this._working) return;
 
         const savedExclude = this.getSavedExcludeConfiguration();
         if (savedExclude === undefined) return;
 
-        Logger.log('_onConfigurationChanged');
+        Logger.log('onConfigurationChanged');
 
         const newExclude = this.getExcludeConfiguration();
         if (

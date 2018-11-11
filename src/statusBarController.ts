@@ -1,57 +1,39 @@
 'use strict';
-import { Disposable, StatusBarAlignment, StatusBarItem, window, workspace } from 'vscode';
-import { Config } from './configuration';
+import { ConfigurationChangeEvent, Disposable, StatusBarAlignment, StatusBarItem, window } from 'vscode';
+import { configuration } from './configuration';
 import { extensionId } from './constants';
 import { Container } from './container';
-import { Objects } from './system';
 
 export class StatusBarController implements Disposable {
-    private _config: Config | undefined;
     private _disposable: Disposable;
     private _statusBarItem: StatusBarItem | undefined;
-    private _statusBarDisposable: Disposable | undefined;
 
     constructor() {
-        this._onConfigurationChanged();
+        this._disposable = Disposable.from(
+            configuration.onDidChange(this.onConfigurationChanged, this),
+            Container.filesExclude.onDidToggle(this._onExcludeToggled, this)
+        );
 
-        const subscriptions: Disposable[] = [];
-
-        subscriptions.push(workspace.onDidChangeConfiguration(this._onConfigurationChanged, this));
-        subscriptions.push(Container.filesExclude.onDidToggle(this._onExcludeToggled, this));
-
-        this._disposable = Disposable.from(...subscriptions);
+        this.onConfigurationChanged(configuration.initializingChangeEvent);
     }
 
     dispose() {
-        this._statusBarDisposable && this._statusBarDisposable.dispose();
         this._statusBarItem && this._statusBarItem.dispose();
         this._disposable && this._disposable.dispose();
     }
 
-    private _onConfigurationChanged() {
-        const cfg = workspace.getConfiguration().get<Config>(extensionId);
-        if (cfg === undefined) return;
-
-        const canToggle = Container.filesExclude.canToggle;
-        if (
-            !Objects.areEquivalent(cfg.statusBar, this._config && this._config.statusBar) ||
-            (canToggle && this._statusBarItem === undefined) ||
-            (!canToggle && this._statusBarItem !== undefined)
-        ) {
+    private onConfigurationChanged(e: ConfigurationChangeEvent) {
+        if (configuration.changed(e, configuration.name('statusBar')('enabled').value)) {
             this._statusBarItem && this._statusBarItem.dispose();
 
-            if (cfg.statusBar.enabled && canToggle) {
+            const canToggle = Container.filesExclude.canToggle;
+            if (Container.config.statusBar.enabled && canToggle) {
                 this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 0);
                 this._statusBarItem.command = `${extensionId}.toggle`;
                 this.updateStatusBarItem(Container.filesExclude.toggled);
                 this._statusBarItem.show();
             }
-            else {
-                this._statusBarItem = undefined;
-            }
         }
-
-        this._config = cfg;
     }
 
     private updateStatusBarItem(toggled: boolean) {
@@ -62,7 +44,7 @@ export class StatusBarController implements Disposable {
     }
 
     private _onExcludeToggled() {
-        if (!this._statusBarItem) return;
+        if (this._statusBarItem === undefined) return;
 
         this.updateStatusBarItem(Container.filesExclude.toggled);
     }
