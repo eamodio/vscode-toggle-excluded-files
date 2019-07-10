@@ -116,7 +116,7 @@
         "vscode:prepublish": "npm run reset && npm run bundle"
     },
     "dependencies": {
-        "lodash-es": "4.17.11"
+        "lodash-es": "4.17.14"
     },
     "devDependencies": {
         "@types/lodash-es": "4.17.1",
