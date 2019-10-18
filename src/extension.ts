@@ -5,16 +5,16 @@ import { Container } from './container';
 import { Logger } from './logger';
 
 export function activate(context: ExtensionContext) {
-    Logger.configure(context, configuration.get('outputLevel'));
+	Logger.configure(context, configuration.get('outputLevel'));
 
-    if (workspace.workspaceFolders == null) {
-        Logger.log('No workspace -- disabling');
-    }
+	if (workspace.workspaceFolders == null) {
+		Logger.log('No workspace -- disabling');
+	}
 
-    Configuration.configure(context);
-    Container.initialize(context, configuration.get());
+	Configuration.configure(context);
+	Container.initialize(context, configuration.get());
 }
 
 export function deactivate() {
-    // nothing to do
+	// nothing to do
 }

@@ -2,11 +2,11 @@
 import { TraceLevel } from './logger';
 
 export interface StatusBarConfig {
-    enabled: boolean;
+	enabled: boolean;
 }
 
 export interface Config {
-    debug: boolean;
-    outputLevel: TraceLevel;
-    statusBar: StatusBarConfig;
+	debug: boolean;
+	outputLevel: TraceLevel;
+	statusBar: StatusBarConfig;
 }

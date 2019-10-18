@@ -3,9 +3,7 @@ import { MessageItem, window } from 'vscode';
 import { extensionId } from '../../constants';
 import { Logger, TraceLevel } from '../../logger';
 
-export function createCommandDecorator(
-	registry: Command[]
-): (command: string, options?: CommandOptions) => Function {
+export function createCommandDecorator(registry: Command[]): (command: string, options?: CommandOptions) => Function {
 	return (command: string, options?: CommandOptions) => _command(registry, command, options);
 }
 
@@ -46,9 +44,7 @@ function _command(registry: Command[], command: string, options: CommandOptions 
 								Logger.showOutputChannel();
 							}
 						} else {
-							window.showErrorMessage(
-								`${options.showErrorMessage} \u00a0\u2014\u00a0 ${ex.toString()}`
-							);
+							window.showErrorMessage(`${options.showErrorMessage} \u00a0\u2014\u00a0 ${ex.toString()}`);
 						}
 					}
 

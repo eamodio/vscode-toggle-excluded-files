@@ -7,32 +7,32 @@ const commandRegistry: Command[] = [];
 const command = createCommandDecorator(commandRegistry);
 
 export class Commands implements Disposable {
-    private readonly _disposable: Disposable;
+	private readonly _disposable: Disposable;
 
-    constructor() {
-        this._disposable = Disposable.from(
-            ...commandRegistry.map(({ name, key, method }) =>
-                commands.registerCommand(name, (...args: any[]) => method.apply(this, args))
-            )
-        );
-    }
+	constructor() {
+		this._disposable = Disposable.from(
+			...commandRegistry.map(({ name, key, method }) =>
+				commands.registerCommand(name, (...args: any[]) => method.apply(this, args))
+			)
+		);
+	}
 
-    dispose() {
-        this._disposable && this._disposable.dispose();
-    }
+	dispose() {
+		this._disposable && this._disposable.dispose();
+	}
 
-    @command('restore')
-    restore() {
-        return Container.filesExclude.restoreConfiguration();
-    }
+	@command('restore')
+	restore() {
+		return Container.filesExclude.restoreConfiguration();
+	}
 
-    @command('show')
-    show() {
-        return Container.filesExclude.applyConfiguration();
-    }
+	@command('show')
+	show() {
+		return Container.filesExclude.applyConfiguration();
+	}
 
-    @command('toggle')
-    toggle() {
-        return Container.filesExclude.toggleConfiguration();
-    }
+	@command('toggle')
+	toggle() {
+		return Container.filesExclude.toggleConfiguration();
+	}
 }
