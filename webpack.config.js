@@ -1,13 +1,46 @@
 'use strict';
-const webpack = require('webpack');
-const CleanPlugin = require('clean-webpack-plugin');
+/* eslint-disable @typescript-eslint/no-var-requires */
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const { CleanWebpackPlugin: CleanPlugin } = require('clean-webpack-plugin');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
+const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = function(env, argv) {
     env = env || {};
-    env.production = Boolean(env.production);
+    env.analyzeBundle = Boolean(env.analyzeBundle);
+    env.analyzeDeps = Boolean(env.analyzeDeps);
+    env.production = env.analyzeBundle || Boolean(env.production);
 
-    const plugins = [new CleanPlugin(['dist'], { verbose: false })];
+    /**
+     * @type any[]
+     */
+    const plugins = [
+        new CleanPlugin({ cleanOnceBeforeBuildPatterns: ['**/*'] }),
+        new ForkTsCheckerPlugin({
+            async: false,
+            eslint: true
+        })
+    ];
+
+    if (env.analyzeDeps) {
+        plugins.push(
+            new CircularDependencyPlugin({
+                cwd: __dirname,
+                exclude: /node_modules/,
+                failOnError: false,
+                onDetected: function({ module: webpackModuleRecord, paths, compilation }) {
+                    if (paths.some(p => p.includes('container.ts'))) return;
+
+                    compilation.warnings.push(new Error(paths.join(' -> ')));
+                }
+            })
+        );
+    }
+
+    if (env.analyzeBundle) {
+        plugins.push(new BundleAnalyzerPlugin());
+    }
 
     return {
         name: 'extension',
@@ -17,11 +50,10 @@ module.exports = function(env, argv) {
         node: {
             __dirname: false
         },
-        devtool: !env.production ? 'source-map' : undefined,
+        devtool: 'source-map',
         output: {
             libraryTarget: 'commonjs2',
-            filename: 'extension.js',
-            devtoolModuleFilenameTemplate: 'file:///[absolute-resource-path]'
+            filename: 'extension.js'
         },
         optimization: {
             minimizer: [
@@ -32,6 +64,7 @@ module.exports = function(env, argv) {
                     terserOptions: {
                         ecma: 8,
                         // Keep the class names otherwise @log won't provide a useful name
+                        // eslint-disable-next-line @typescript-eslint/camelcase
                         keep_classnames: true,
                         module: true
                     }
@@ -44,20 +77,20 @@ module.exports = function(env, argv) {
         module: {
             rules: [
                 {
-                    test: /\.ts$/,
-                    enforce: 'pre',
-                    use: 'tslint-loader',
-                    exclude: /node_modules/
-                },
-                {
+                    exclude: /node_modules|\.d\.ts$/,
                     test: /\.tsx?$/,
-                    use: 'ts-loader',
-                    exclude: /node_modules|\.d\.ts$/
+                    use: {
+                        loader: 'ts-loader',
+                        options: {
+                            experimentalWatchApi: true,
+                            transpileOnly: true
+                        }
+                    }
                 }
             ]
         },
         resolve: {
-            extensions: ['.ts', '.tsx', '.js', '.jsx']
+            extensions: ['.ts', '.tsx', '.js', '.jsx', '.json']
         },
         plugins: plugins,
         stats: {

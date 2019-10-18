@@ -1,11 +1,5 @@
 'use strict';
-
-export enum LogLevel {
-    Silent = 'silent',
-    Errors = 'errors',
-    Verbose = 'verbose',
-    Debug = 'debug'
-}
+import { TraceLevel } from './logger';
 
 export interface StatusBarConfig {
     enabled: boolean;
@@ -13,6 +7,6 @@ export interface StatusBarConfig {
 
 export interface Config {
     debug: boolean;
-    outputLevel: LogLevel;
+    outputLevel: TraceLevel;
     statusBar: StatusBarConfig;
 }

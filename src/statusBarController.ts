@@ -23,7 +23,7 @@ export class StatusBarController implements Disposable {
     }
 
     private onConfigurationChanged(e: ConfigurationChangeEvent) {
-        if (configuration.changed(e, configuration.name('statusBar')('enabled').value)) {
+        if (configuration.changed(e, 'statusBar', 'enabled')) {
             this._statusBarItem && this._statusBarItem.dispose();
 
             const canToggle = Container.filesExclude.canToggle;

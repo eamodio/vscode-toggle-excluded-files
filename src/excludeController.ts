@@ -5,7 +5,7 @@ import { Container } from './container';
 import { Logger } from './logger';
 import { Objects } from './system';
 
-interface IConfigInspect {
+interface ConfigInspect {
     key: string | undefined;
     defaultValue?: { [id: string]: any };
     globalValue?: { [id: string]: any };
@@ -31,7 +31,7 @@ abstract class ExcludeControllerBase implements Disposable {
         this._disposable = Disposable.from(...subscriptions);
     }
 
-    async dispose() {
+    dispose() {
         this._disposable && this._disposable.dispose();
     }
 
@@ -84,7 +84,7 @@ abstract class ExcludeControllerBase implements Disposable {
             const exclude = this.getExcludeConfiguration();
             this.saveExcludeConfiguration(exclude);
 
-            const appliedExclude: IConfigInspect = {
+            const appliedExclude: ConfigInspect = {
                 key: exclude === undefined ? undefined : exclude.key,
                 globalValue: exclude === undefined || exclude.globalValue === undefined ? undefined : {},
                 workspaceValue: exclude === undefined || exclude.workspaceValue === undefined ? undefined : {}
@@ -176,7 +176,12 @@ abstract class ExcludeControllerBase implements Disposable {
 
         Logger.log(`toggleConfiguration('${this.section}')`);
 
-        return this.hasSavedExcludeConfiguration() ? this.restoreConfiguration() : this.applyConfiguration();
+        if (this.hasSavedExcludeConfiguration()) {
+            await this.restoreConfiguration();
+        }
+        else {
+            await this.applyConfiguration();
+        }
     }
 
     get canToggle() {
@@ -193,27 +198,27 @@ abstract class ExcludeControllerBase implements Disposable {
         this.saveExcludeConfiguration(undefined);
     }
 
-    private getExcludeConfiguration(): IConfigInspect | undefined {
+    private getExcludeConfiguration(): ConfigInspect | undefined {
         return workspace.getConfiguration().inspect(this.section);
     }
 
-    private getAppliedExcludeConfiguration(): IConfigInspect | undefined {
-        return Container.context.workspaceState.get<IConfigInspect>(this.appliedState);
+    private getAppliedExcludeConfiguration(): ConfigInspect | undefined {
+        return Container.context.workspaceState.get<ConfigInspect>(this.appliedState);
     }
 
-    private getSavedExcludeConfiguration(): IConfigInspect | undefined {
-        return Container.context.workspaceState.get<IConfigInspect>(this.savedState);
+    private getSavedExcludeConfiguration(): ConfigInspect | undefined {
+        return Container.context.workspaceState.get<ConfigInspect>(this.savedState);
     }
 
     private hasSavedExcludeConfiguration(): boolean {
         return this.getSavedExcludeConfiguration() !== undefined;
     }
 
-    private saveAppliedExcludeConfiguration(excluded: IConfigInspect | undefined): void {
+    private saveAppliedExcludeConfiguration(excluded: ConfigInspect | undefined): void {
         Container.context.workspaceState.update(this.appliedState, excluded);
     }
 
-    private saveExcludeConfiguration(excluded: IConfigInspect | undefined): void {
+    private saveExcludeConfiguration(excluded: ConfigInspect | undefined): void {
         Container.context.workspaceState.update(this.savedState, excluded);
     }
 }

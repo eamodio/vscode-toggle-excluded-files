@@ -1,20 +1,20 @@
 'use strict';
 import { ExtensionContext, workspace } from 'vscode';
-import { Config, Configuration, configuration } from './configuration';
+import { Configuration, configuration } from './configuration';
 import { Container } from './container';
 import { Logger } from './logger';
 
-// this method is called when your extension is activated
-export async function activate(context: ExtensionContext) {
-    Logger.configure(context);
+export function activate(context: ExtensionContext) {
+    Logger.configure(context, configuration.get('outputLevel'));
 
-    if (!workspace.rootPath) {
+    if (workspace.workspaceFolders == null) {
         Logger.log('No workspace -- disabling');
     }
 
     Configuration.configure(context);
-    Container.initialize(context, configuration.get<Config>());
+    Container.initialize(context, configuration.get());
 }
 
-// this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+    // nothing to do
+}

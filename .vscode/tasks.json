@@ -20,13 +20,13 @@
             "type": "npm",
             "script": "build",
             "group": "build",
-            "problemMatcher": ["$ts-webpack", "$tslint-webpack"]
+            "problemMatcher": ["$ts-checker-webpack", "$ts-checker-eslint-webpack"]
         },
         {
             "type": "npm",
             "script": "lint",
             "group": "build",
-            "problemMatcher": ["$tslint5"]
+            "problemMatcher": ["$eslint-stylish"]
         },
         {
             "type": "npm",
@@ -36,7 +36,7 @@
                 "isDefault": true
             },
             "isBackground": true,
-            "problemMatcher": ["$ts-webpack-watch", "$tslint-webpack-watch"]
+            "problemMatcher": ["$ts-checker-webpack-watch", "$ts-checker-eslint-webpack-watch"]
         }
     ]
 }

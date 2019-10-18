@@ -23,7 +23,7 @@ export class Container {
     private static _config: Config | undefined;
     static get config() {
         if (this._config === undefined) {
-            this._config = configuration.get<Config>();
+            this._config = configuration.get();
         }
         return this._config;
     }
