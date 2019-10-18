@@ -4,6 +4,7 @@ import { WorkspaceState } from './constants';
 import { Container } from './container';
 import { Logger } from './logger';
 import { Objects } from './system';
+import { configuration } from './configuration';
 
 interface ConfigInspect {
 	key: string | undefined;
@@ -26,7 +27,7 @@ abstract class ExcludeControllerBase implements Disposable {
 
 		const subscriptions: Disposable[] = [];
 
-		subscriptions.push(workspace.onDidChangeConfiguration(this.onConfigurationChanged, this));
+		subscriptions.push(configuration.onDidChangeAny(this.onConfigurationChanged, this));
 
 		this._disposable = Disposable.from(...subscriptions);
 	}
@@ -45,7 +46,7 @@ abstract class ExcludeControllerBase implements Disposable {
 		const savedExclude = this.getSavedExcludeConfiguration();
 		if (savedExclude === undefined) return;
 
-		Logger.log('onConfigurationChanged');
+		Logger.log('ExcludeController.onConfigurationChanged');
 
 		const newExclude = this.getExcludeConfiguration();
 		if (
@@ -66,7 +67,7 @@ abstract class ExcludeControllerBase implements Disposable {
 			return;
 		}
 
-		Logger.log('onConfigurationChanged', 'clearing state');
+		Logger.log('ExcludeController.onConfigurationChanged', 'clearing state');
 
 		// Remove the currently saved config, since it was directly edited
 		this.clearExcludeConfiguration();
@@ -76,7 +77,7 @@ abstract class ExcludeControllerBase implements Disposable {
 		// If we have saved state, the we are already applied to exit
 		if (this._working || this.hasSavedExcludeConfiguration()) return;
 
-		Logger.log(`applyConfiguration('${this.section}')`);
+		Logger.log(`ExcludeController.applyConfiguration('${this.section}')`);
 
 		try {
 			this._working = true;
@@ -131,7 +132,7 @@ abstract class ExcludeControllerBase implements Disposable {
 		// If we don't have saved state, the we don't have anything to restore so exit
 		if (this._working || !this.hasSavedExcludeConfiguration()) return;
 
-		Logger.log(`restoreConfiguration('${this.section}')`);
+		Logger.log(`ExcludeController.restoreConfiguration('${this.section}')`);
 
 		try {
 			this._working = true;
@@ -160,7 +161,7 @@ abstract class ExcludeControllerBase implements Disposable {
 			Logger.error(ex);
 			this.clearExcludeConfiguration();
 		} finally {
-			Logger.log(`restoreConfiguration('${this.section}')`, 'done');
+			Logger.log(`ExcludeController.restoreConfiguration('${this.section}')`, 'done');
 
 			this._working = false;
 			this._onDidToggle.fire();
@@ -170,7 +171,7 @@ abstract class ExcludeControllerBase implements Disposable {
 	async toggleConfiguration() {
 		if (this._working) return;
 
-		Logger.log(`toggleConfiguration('${this.section}')`);
+		Logger.log(`ExcludeController.toggleConfiguration('${this.section}')`);
 
 		if (this.hasSavedExcludeConfiguration()) {
 			await this.restoreConfiguration();
