@@ -2,7 +2,7 @@
 	"name": "toggle-excluded-files",
 	"displayName": "Toggle Excluded Files",
 	"description": "Quickly toggles excluded (hidden) files visibility in the file explorer",
-	"version": "1.7.0",
+	"version": "2.0.0",
 	"engines": {
 		"vscode": "^1.72.0"
 	},

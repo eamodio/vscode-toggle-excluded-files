@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ## [Unreleased]
 
+## [2.0.0] - 2023-03-05
+
 ### Added
 
 - Adds toggle button to the Explorer view &mdash; closes [#44](https://github.com/eamodio/vscode-toggle-excluded-files/issues/44)
