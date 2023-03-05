@@ -40,7 +40,7 @@ export class StatusBarController implements Disposable {
 	private updateStatusBarItem(toggled: boolean) {
 		if (this._statusBarItem == null) return;
 
-		this._statusBarItem.text = toggled ? '$(eye)\u2022' : '$(eye)';
+		this._statusBarItem.text = toggled ? '$(eye-closed)' : '$(eye)';
 		this._statusBarItem.tooltip = `${toggled ? 'Restore' : 'Show'} Excluded Files`;
 	}
 
