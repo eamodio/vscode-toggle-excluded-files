@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Adds toggle button to the Explorer view &mdash; closes [#44](https://github.com/eamodio/vscode-toggle-excluded-files/issues/44)
+- Adds support for VS Code on the Web (vscode.dev / github.dev)
+- Adds workspace trust support
+
 ## [1.7.0] - 2019-10-18
 
 ### Fixed
