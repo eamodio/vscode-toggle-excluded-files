@@ -7,13 +7,14 @@ export enum OutputLevel {
 	Debug = 'debug',
 }
 
-export interface StatusBarConfig {
-	enabled: boolean;
-}
-
 export interface Config {
+	explorer: {
+		enabled: boolean;
+	};
 	outputLevel: OutputLevel;
-	statusBar: StatusBarConfig;
+	statusBar: {
+		enabled: boolean;
+	};
 }
 
 export function fromOutputLevel(level: LogLevel | OutputLevel): LogLevel {

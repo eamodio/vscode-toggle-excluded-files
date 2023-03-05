@@ -1,7 +1,8 @@
-import type { Event } from 'vscode';
-import { ConfigurationTarget, Disposable, EventEmitter, workspace } from 'vscode';
-import { WorkspaceState } from './constants';
+import type { ConfigurationChangeEvent, Disposable, Event } from 'vscode';
+import { ConfigurationTarget, EventEmitter } from 'vscode';
+import { ContextKeys, WorkspaceState } from './constants';
 import type { Container } from './container';
+import { setContext } from './context';
 import { configuration } from './system/configuration';
 import { Logger } from './system/logger';
 import { areEqual } from './system/object';
@@ -20,13 +21,8 @@ export class FilesExcludeController implements Disposable {
 	private _working: boolean = false;
 
 	constructor(private readonly container: Container) {
+		this._disposable = configuration.onDidChangeAny(this.onConfigurationChanged, this);
 		this.onConfigurationChanged();
-
-		const subscriptions: Disposable[] = [];
-
-		subscriptions.push(configuration.onDidChangeAny(this.onConfigurationChanged, this));
-
-		this._disposable = Disposable.from(...subscriptions);
 	}
 
 	dispose() {
@@ -41,17 +37,18 @@ export class FilesExcludeController implements Disposable {
 		return WorkspaceState.SavedState;
 	}
 
-	private onConfigurationChanged() {
+	private onConfigurationChanged(e?: ConfigurationChangeEvent) {
 		if (this._working) return;
+		if (e != null && !e.affectsConfiguration(this._section)) return;
 
 		const savedExclude = this.getSavedExcludeConfiguration();
-		if (savedExclude === undefined) return;
+		if (savedExclude == null) return;
 
 		Logger.log('ExcludeController.onConfigurationChanged');
 
 		const newExclude = this.getExcludeConfiguration();
 		if (
-			newExclude !== undefined &&
+			newExclude != null &&
 			areEqual(savedExclude.globalValue, newExclude.globalValue) &&
 			areEqual(savedExclude.workspaceValue, newExclude.workspaceValue)
 		) {
@@ -60,8 +57,8 @@ export class FilesExcludeController implements Disposable {
 
 		const appliedExclude = this.getAppliedExcludeConfiguration();
 		if (
-			newExclude !== undefined &&
-			appliedExclude !== undefined &&
+			newExclude != null &&
+			appliedExclude != null &&
 			areEqual(appliedExclude.globalValue, newExclude.globalValue) &&
 			areEqual(appliedExclude.workspaceValue, newExclude.workspaceValue)
 		) {
@@ -150,13 +147,19 @@ export class FilesExcludeController implements Disposable {
 
 			const promises: Thenable<void>[] = [];
 
-			if (savedExclude !== undefined) {
-				if (savedExclude.globalValue !== undefined) {
-					promises.push(workspace.getConfiguration().update(this._section, savedExclude.globalValue, true));
-				}
-				if (savedExclude.workspaceValue !== undefined) {
+			if (savedExclude != null) {
+				if (savedExclude.globalValue != null) {
 					promises.push(
-						workspace.getConfiguration().update(this._section, savedExclude.workspaceValue, false),
+						configuration.updateAny(this._section, savedExclude.globalValue, ConfigurationTarget.Global),
+					);
+				}
+				if (savedExclude.workspaceValue != null) {
+					promises.push(
+						configuration.updateAny(
+							this._section,
+							savedExclude.workspaceValue,
+							ConfigurationTarget.Workspace,
+						),
 					);
 				}
 			}
@@ -212,8 +215,15 @@ export class FilesExcludeController implements Disposable {
 		return this.container.context.workspaceState.get<FilesExcludeInspect>(this.appliedState);
 	}
 
+	private _loaded = false;
 	private getSavedExcludeConfiguration(): FilesExcludeInspect | undefined {
-		return this.container.context.workspaceState.get<FilesExcludeInspect>(this.savedState);
+		const state = this.container.context.workspaceState.get<FilesExcludeInspect>(this.savedState);
+		void setContext(ContextKeys.Toggled, state != null);
+		if (!this._loaded) {
+			this._loaded = true;
+			void setContext(ContextKeys.Loaded, true);
+		}
+		return state;
 	}
 
 	private hasSavedExcludeConfiguration(): boolean {

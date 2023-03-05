@@ -27,7 +27,7 @@ export class StatusBarController implements Disposable {
 		if (e == null || configuration.changed(e, 'statusBar.enabled') || e.affectsConfiguration('files.exclude')) {
 			this._statusBarItem?.dispose();
 
-			const canToggle = this.container.filesExclude.canToggle;
+			const { canToggle } = this.container.filesExclude;
 			if (configuration.get('statusBar.enabled') && canToggle) {
 				this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 0);
 				this._statusBarItem.command = `${commandPrefix}.toggle`;
@@ -41,7 +41,7 @@ export class StatusBarController implements Disposable {
 		if (this._statusBarItem == null) return;
 
 		this._statusBarItem.text = toggled ? '$(eye-closed)' : '$(eye)';
-		this._statusBarItem.tooltip = `${toggled ? 'Restore' : 'Show'} Excluded Files`;
+		this._statusBarItem.tooltip = `${toggled ? 'Hide' : 'Show'} Excluded Files`;
 	}
 
 	private _onExcludeToggled() {

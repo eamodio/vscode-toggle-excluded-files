@@ -59,6 +59,12 @@
 			"type": "object",
 			"title": "Toggle Excluded Files configuration",
 			"properties": {
+				"toggleexcludedfiles.explorer.enabled": {
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "Specifies whether to show the toggle button in the Explorer view",
+					"scope": "window"
+				},
 				"toggleexcludedfiles.statusBar.enabled": {
 					"type": "boolean",
 					"default": true,
@@ -89,12 +95,14 @@
 			{
 				"command": "toggleexcludedfiles.show",
 				"title": "Show Excluded Files",
-				"category": "Files"
+				"category": "Files",
+				"icon": "$(eye)"
 			},
 			{
 				"command": "toggleexcludedfiles.restore",
-				"title": "Restore Excluded Files",
-				"category": "Files"
+				"title": "Hide Excluded Files",
+				"category": "Files",
+				"icon": "$(eye-closed)"
 			},
 			{
 				"command": "toggleexcludedfiles.toggle",
@@ -109,7 +117,31 @@
 				"mac": "cmd+shift+a",
 				"when": "filesExplorerFocus"
 			}
-		]
+		],
+		"menus": {
+			"commandPalette": [
+				{
+					"command": "toggleexcludedfiles.show",
+					"when": "toggleexcludedfiles:loaded && !toggleexcludedfiles:toggled"
+				},
+				{
+					"command": "toggleexcludedfiles.restore",
+					"when": "toggleexcludedfiles:loaded && toggleexcludedfiles:toggled"
+				}
+			],
+			"view/title": [
+				{
+					"command": "toggleexcludedfiles.show",
+					"group": "navigation@21",
+					"when": "view == 'workbench.explorer.fileView' && toggleexcludedfiles:loaded && !toggleexcludedfiles:toggled && config.toggleexcludedfiles.explorer.enabled"
+				},
+				{
+					"command": "toggleexcludedfiles.restore",
+					"group": "navigation@21",
+					"when": "view == 'workbench.explorer.fileView' && toggleexcludedfiles:loaded && toggleexcludedfiles:toggled && config.toggleexcludedfiles.explorer.enabled"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"analyze:bundle": "webpack --mode production --env analyzeBundle",
