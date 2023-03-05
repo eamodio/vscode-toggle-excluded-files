@@ -1,32 +1,9 @@
-'use strict';
-import { isEqual as _isEqual } from 'lodash-es';
-import { Arrays } from './array';
+export function areEqual(a: any, b: any): boolean {
+	if (a === b) return true;
+	if (a == null || b == null) return false;
 
-export namespace Objects {
-	export function areEquivalent(value: any, other: any) {
-		if (Array.isArray(value) && Array.isArray(other)) {
-			return Arrays.areEquivalent(value, other);
-		}
-		return isEqual(value, other);
-	}
+	const aType = typeof a;
+	if (aType === typeof b && (aType === 'string' || aType === 'number' || aType === 'boolean')) return false;
 
-	export function isEqual(value: any, other: any) {
-		return _isEqual(value, other);
-	}
-
-	export function entries<T>(o: { [key: string]: T }): IterableIterator<[string, T]>;
-	export function entries<T>(o: { [key: number]: T }): IterableIterator<[string, T]>;
-	export function* entries<T>(o: any): IterableIterator<[string, T]> {
-		for (const key in o) {
-			yield [key, o[key]];
-		}
-	}
-
-	export function values<T>(o: { [key: string]: T }): IterableIterator<T>;
-	export function values<T>(o: { [key: number]: T }): IterableIterator<T>;
-	export function* values<T>(o: any): IterableIterator<T> {
-		for (const key in o) {
-			yield o[key];
-		}
-	}
+	return JSON.stringify(a) === JSON.stringify(b);
 }

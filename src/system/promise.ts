@@ -1,30 +1,74 @@
-'use strict';
-import { CancellationToken } from 'vscode';
+import type { CancellationToken, Disposable } from 'vscode';
 
-export namespace Promises {
-	export function cancellable<T>(promise: Promise<T>, token: CancellationToken): Promise<T | undefined> {
-		return new Promise<T | undefined>((resolve, reject) => {
-			token.onCancellationRequested(() => resolve(undefined));
-
-			promise.then(resolve, reject);
-		});
+export class PromiseCancelledError<T extends Promise<any> = Promise<any>> extends Error {
+	constructor(public readonly promise: T, message: string) {
+		super(message);
 	}
+}
 
-	export function is<T>(obj: T | Promise<T>): obj is Promise<T> {
-		return obj && typeof (obj as Promise<T>).then === 'function';
+export class PromiseCancelledErrorWithId<TKey, T extends Promise<any> = Promise<any>> extends PromiseCancelledError<T> {
+	constructor(public readonly id: TKey, promise: T, message: string) {
+		super(promise, message);
 	}
+}
 
-	export class TimeoutError<T> extends Error {
-		constructor(public readonly promise: T) {
-			super('Promise timed out');
+export function cancellable<T>(
+	promise: Promise<T>,
+	timeoutOrToken?: number | CancellationToken,
+	options: {
+		cancelMessage?: string;
+		onDidCancel?(resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void): void;
+	} = {},
+): Promise<T> {
+	if (timeoutOrToken == null || (typeof timeoutOrToken === 'number' && timeoutOrToken <= 0)) return promise;
+
+	return new Promise((resolve, reject) => {
+		let fulfilled = false;
+		let timer: ReturnType<typeof setTimeout> | undefined;
+		let disposable: Disposable | undefined;
+
+		if (typeof timeoutOrToken === 'number') {
+			timer = setTimeout(() => {
+				if (typeof options.onDidCancel === 'function') {
+					options.onDidCancel(resolve, reject);
+				} else {
+					reject(new PromiseCancelledError(promise, options.cancelMessage ?? 'TIMED OUT'));
+				}
+			}, timeoutOrToken);
+		} else {
+			disposable = timeoutOrToken.onCancellationRequested(() => {
+				disposable?.dispose();
+				if (fulfilled) return;
+
+				if (typeof options.onDidCancel === 'function') {
+					options.onDidCancel(resolve, reject);
+				} else {
+					reject(new PromiseCancelledError(promise, options.cancelMessage ?? 'CANCELLED'));
+				}
+			});
 		}
-	}
 
-	export function timeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-		return new Promise<T>((resolve, reject) => {
-			setTimeout(() => reject(new TimeoutError(promise)), ms);
+		promise.then(
+			() => {
+				fulfilled = true;
+				if (timer != null) {
+					clearTimeout(timer);
+				}
+				disposable?.dispose();
+				resolve(promise);
+			},
+			ex => {
+				fulfilled = true;
+				if (timer != null) {
+					clearTimeout(timer);
+				}
+				disposable?.dispose();
+				reject(ex);
+			},
+		);
+	});
+}
 
-			promise.then(resolve, reject);
-		});
-	}
+export function isPromise<T>(obj: PromiseLike<T> | T): obj is Promise<T> {
+	return obj instanceof Promise || typeof (obj as PromiseLike<T>)?.then === 'function';
 }

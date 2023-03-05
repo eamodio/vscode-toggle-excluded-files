@@ -1,8 +1,20 @@
-'use strict';
+import { hrtime } from '@env/hrtime';
 
-export namespace Strings {
-	export function getDurationMilliseconds(start: [number, number]) {
-		const [secs, nanosecs] = process.hrtime(start);
-		return secs * 1000 + Math.floor(nanosecs / 1000000);
-	}
+const compareCollator = new Intl.Collator(undefined, { sensitivity: 'accent' });
+export function compareIgnoreCase(a: string, b: string): 0 | -1 | 1 {
+	const result = compareCollator.compare(a, b);
+	// Intl.Collator.compare isn't guaranteed to always return 1 or -1 on all platforms so normalize it
+	return result === 0 ? 0 : result > 0 ? 1 : -1;
+}
+
+export function equalsIgnoreCase(a: string | null | undefined, b: string | null | undefined): boolean {
+	// Treat `null` & `undefined` as equivalent
+	if (a == null && b == null) return true;
+	if (a == null || b == null) return false;
+	return compareIgnoreCase(a, b) === 0;
+}
+
+export function getDurationMilliseconds(start: [number, number]) {
+	const [secs, nanosecs] = hrtime(start);
+	return secs * 1000 + Math.floor(nanosecs / 1000000);
 }

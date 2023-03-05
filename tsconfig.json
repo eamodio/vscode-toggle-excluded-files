@@ -1,20 +1,10 @@
 {
+	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
-		"experimentalDecorators": true,
-		"forceConsistentCasingInFileNames": true,
-		"importHelpers": true,
-		"lib": ["es2018"],
-		"module": "esnext",
-		"moduleResolution": "node",
-		"noFallthroughCasesInSwitch": true,
-		"noImplicitReturns": true,
-		"noUnusedLocals": false,
-		"outDir": "dist",
-		"resolveJsonModule": true,
-		"rootDir": "src",
-		"sourceMap": true,
-		"strict": true,
-		"target": "es2018"
+		"paths": {
+			"@env/*": ["src/env/node/*"]
+		}
 	},
-	"exclude": ["node_modules", "test"]
+	"include": ["src/**/*"],
+	"exclude": ["src/test/**/*", "src/env/browser/**/*"]
 }

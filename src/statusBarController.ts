@@ -1,52 +1,52 @@
-'use strict';
-import { ConfigurationChangeEvent, Disposable, StatusBarAlignment, StatusBarItem, window } from 'vscode';
-import { configuration } from './configuration';
-import { extensionId } from './constants';
-import { Container } from './container';
+import type { ConfigurationChangeEvent, StatusBarItem } from 'vscode';
+import { Disposable, StatusBarAlignment, window } from 'vscode';
+import { commandPrefix } from './constants';
+import type { Container } from './container';
+import { configuration } from './system/configuration';
 
 export class StatusBarController implements Disposable {
 	private _disposable: Disposable;
 	private _statusBarItem: StatusBarItem | undefined;
 
-	constructor() {
+	constructor(private readonly container: Container) {
 		this._disposable = Disposable.from(
 			configuration.onDidChangeAny(this.onConfigurationChanged, this),
 			configuration.onDidChange(this.onConfigurationChanged, this),
-			Container.filesExclude.onDidToggle(this._onExcludeToggled, this)
+			container.filesExclude.onDidToggle(this._onExcludeToggled, this),
 		);
 
-		this.onConfigurationChanged(configuration.initializingChangeEvent);
+		this.onConfigurationChanged();
 	}
 
 	dispose() {
-		this._statusBarItem && this._statusBarItem.dispose();
-		this._disposable && this._disposable.dispose();
+		this._statusBarItem?.dispose();
+		this._disposable?.dispose();
 	}
 
-	private onConfigurationChanged(e: ConfigurationChangeEvent) {
-		if (configuration.changed(e, 'statusBar', 'enabled') || e.affectsConfiguration('files.exclude')) {
-			this._statusBarItem && this._statusBarItem.dispose();
+	private onConfigurationChanged(e?: ConfigurationChangeEvent) {
+		if (e == null || configuration.changed(e, 'statusBar.enabled') || e.affectsConfiguration('files.exclude')) {
+			this._statusBarItem?.dispose();
 
-			const canToggle = Container.filesExclude.canToggle;
-			if (Container.config.statusBar.enabled && canToggle) {
+			const canToggle = this.container.filesExclude.canToggle;
+			if (configuration.get('statusBar.enabled') && canToggle) {
 				this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 0);
-				this._statusBarItem.command = `${extensionId}.toggle`;
-				this.updateStatusBarItem(Container.filesExclude.toggled);
+				this._statusBarItem.command = `${commandPrefix}.toggle`;
+				this.updateStatusBarItem(this.container.filesExclude.toggled);
 				this._statusBarItem.show();
 			}
 		}
 	}
 
 	private updateStatusBarItem(toggled: boolean) {
-		if (this._statusBarItem === undefined) return;
+		if (this._statusBarItem == null) return;
 
 		this._statusBarItem.text = toggled ? '$(eye)\u2022' : '$(eye)';
 		this._statusBarItem.tooltip = `${toggled ? 'Restore' : 'Show'} Excluded Files`;
 	}
 
 	private _onExcludeToggled() {
-		if (this._statusBarItem === undefined) return;
+		if (this._statusBarItem == null) return;
 
-		this.updateStatusBarItem(Container.filesExclude.toggled);
+		this.updateStatusBarItem(this.container.filesExclude.toggled);
 	}
 }

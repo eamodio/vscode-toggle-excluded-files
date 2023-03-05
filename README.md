@@ -1,4 +1,7 @@
-[![](https://vsmarketplacebadge.apphb.com/version/eamodio.toggle-excluded-files.svg)](https://marketplace.visualstudio.com/items?itemName=eamodio.toggle-excluded-files) [![](https://vsmarketplacebadge.apphb.com/installs/eamodio.toggle-excluded-files.svg)](https://marketplace.visualstudio.com/items?itemName=eamodio.toggle-excluded-files) [![](https://vsmarketplacebadge.apphb.com/rating/eamodio.toggle-excluded-files.svg)](https://marketplace.visualstudio.com/items?itemName=eamodio.toggle-excluded-files)
+[![](https://vsmarketplacebadges.dev/version-short/amodio.toggle-excluded-files.svg)](https://marketplace.visualstudio.com/items?itemName=amodio.toggle-excluded-files)
+[![](https://vsmarketplacebadges.dev/downloads-short/amodio.toggle-excluded-files.svg)](https://marketplace.visualstudio.com/items?itemName=amodio.toggle-excluded-files)
+[![](https://vsmarketplacebadges.dev/rating-short/amodio.toggle-excluded-files.svg)](https://marketplace.visualstudio.com/items?itemName=amodio.toggle-excluded-files)
+[![](https://img.shields.io/badge/vscode--dev--community-toggle--excluded--files-blue.svg?logo=slack&labelColor=555555)](https://vscode-slack.amod.io)
 
 # Toggle Excluded Files
 

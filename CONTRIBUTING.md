@@ -18,16 +18,16 @@ git clone https://github.com/eamodio/vscode-toggle-excluded-files.git
 
 Prerequisites
 
-- [Git](https://git-scm.com/)
-- [NodeJS](https://nodejs.org/), `>= 10.11.0`
-- [yarn](https://yarnpkg.com/), `>= 1.17.3`
+- [Git](https://git-scm.com/), `>= 2.7.2`
+- [NodeJS](https://nodejs.org/), `>= 16.14.2`
+- [yarn](https://yarnpkg.com/), `>= 1.22.19`
 
 ### Dependencies
 
 From a terminal, where you have cloned the repository, execute the following command to install the required dependencies:
 
 ```
-yarn --frozen-lockfile
+yarn
 ```
 
 ### Build
@@ -95,18 +95,59 @@ yarn run bundle
 To generate a VSIX (installation package) run the following from a terminal:
 
 ```
-yarn run pack
+yarn run package
 ```
 
 ### Debugging
 
-#### Using VS Code
+#### Using VS Code (desktop)
 
 1. Open the `vscode-toggle-excluded-files` folder
 2. Ensure the required [dependencies](#dependencies) are installed
-3. Start the [`watch`](#watch) task
-4. Choose the `Launch Toggle Excluded` launch configuration from the launch dropdown in the Debug viewlet and press `F5`.
+3. Choose the `Watch & Run` launch configuration from the launch dropdown in the Run and Debug viewlet and press `F5`.
+
+#### Using VS Code (desktop webworker)
+
+1. Open the `vscode-toggle-excluded-files` folder
+2. Ensure the required [dependencies](#dependencies) are installed
+3. Choose the `Watch & Run (web)` launch configuration from the launch dropdown in the Run and Debug viewlet and press `F5`.
+
+#### Using VS Code for the Web (locally)
+
+See https://code.visualstudio.com/api/extension-guides/web-extensions#test-your-web-extension-in-a-browser-using-vscodetestweb
+
+1. Open the `vscode-toggle-excluded-files` folder
+2. Ensure the required [dependencies](#dependencies) are installed
+3. Run the `build` or `watch` task from the command palette
+4. Run the `Run (local web)` task from the command palette
+
+#### Using VS Code for the Web (vscode.dev)
+
+See https://code.visualstudio.com/api/extension-guides/web-extensions#test-your-web-extension-in-on-vscode.dev
+
+1. Open the `vscode-toggle-excluded-files` folder
+2. Ensure the required [dependencies](#dependencies) are installed
+3. Run the `build` or `watch` task from the command palette
+4. Run the `Run (vscode.dev)` task from the command palette
 
 ## Submitting a Pull Request
 
 Please follow all the instructions in the [PR template](.github/PULL_REQUEST_TEMPLATE.md).
+
+### Update the CHANGELOG
+
+The [Change Log](CHANGELOG.md) is updated manually and an entry should be added for each change. Changes are grouped in lists by `added`, `changed` or `fixed`.
+
+Entries should be written in future tense:
+
+> - Adds awesome feature
+
+Be sure to give yourself much deserved credit by adding your name and user in the entry:
+
+> - Adds awesome feature &mdash; thanks to [PR #1](https://github.com/eamodio/vscode-toggle-excluded-files/pull/1) by Eric Amodio ([@eamodio](https://github.com/eamodio))
+
+### Update the README
+
+If this is your first contribution to Find Related Files, please give yourself credit by adding yourself to the `Contributors` section of the [README](README.md#contributors-) in the following format:
+
+> - `Your Name ([@<your-github-username>](https://github.com/<your-github-username>)) &mdash; [contributions](https://github.com/eamodio/vscode-toggle-excluded-files/commits?author=<your-github-username>)`
