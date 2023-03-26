@@ -156,6 +156,6 @@ Entries should be written in future tense:
 
 ### Update the README
 
-If this is your first contribution to Find Related Files, please give yourself credit by adding yourself to the `Contributors` section of the [README](README.md#contributors-) in the following format:
+If this is your first contribution to Toggle Excluded Files, please give yourself credit by adding yourself to the `Contributors` section of the [README](README.md#contributors-) in the following format:
 
 > - `Your Name ([@<your-github-username>](https://github.com/<your-github-username>)) &mdash; [contributions](https://github.com/eamodio/vscode-toggle-excluded-files/commits?author=<your-github-username>)`
