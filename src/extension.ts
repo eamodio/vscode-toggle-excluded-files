@@ -13,7 +13,7 @@ export function activate(context: ExtensionContext) {
 
 	Logger.configure(
 		{
-			name: 'Find Related',
+			name: 'Toggle Excluded',
 			createChannel: function (name: string) {
 				return window.createOutputChannel(name);
 			},

@@ -89,7 +89,7 @@
 						"Logs all errors, warnings, and messages",
 						"Logs all errors, warnings, and messages with extra context useful for debugging"
 					],
-					"markdownDescription": "Specifies how much (if any) output will be sent to the ToggleExcluded output channel",
+					"markdownDescription": "Specifies how much (if any) output will be sent to the _Toggle Excluded_ output channel",
 					"scope": "window"
 				}
 			}

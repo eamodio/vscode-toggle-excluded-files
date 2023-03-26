@@ -43,8 +43,8 @@ body:
           description: |
               Logs? Links? References? Anything that will give us more context about the issue you are encountering!
           placeholder: |
-              For intermittent issues, please enable debug logging by by setting `"findrelated.outputLevel": "debug"` in your `settings.json`.
-              This will enable logging to the _Find Related_ channel in the _Output_ pane.
+              For intermittent issues, please enable debug logging by by setting `"toggleexcludedfiles.outputLevel": "debug"` in your `settings.json`.
+              This will enable logging to the _Toggle Excluded_ channel in the _Output_ pane.
 
               Once enabled, please reproduce the issue, and attach the logs.
       validations:
