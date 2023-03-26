@@ -140,11 +140,19 @@ The [Change Log](CHANGELOG.md) is updated manually and an entry should be added 
 
 Entries should be written in future tense:
 
-> - Adds awesome feature
+- Be sure to give yourself much deserved credit by adding your name and user in the entry
 
-Be sure to give yourself much deserved credit by adding your name and user in the entry:
-
-> - Adds awesome feature &mdash; thanks to [PR #1](https://github.com/eamodio/vscode-toggle-excluded-files/pull/1) by Eric Amodio ([@eamodio](https://github.com/eamodio))
+> Added
+>
+> - Adds awesome feature &mdash; closes [#\<issue\>](https://github.com/eamodio/vscode-toggle-excluded-files/issues/<issue>) thanks to [PR #\<pr\>](https://github.com/eamodio/vscode-toggle-excluded-files/issues/<pr>) by Your Name ([@\<your-github-username\>](https://github.com/<your-github-username>))
+>
+> Changed
+>
+> - Changes or improves an existing feature &mdash; closes [#\<issue\>](https://github.com/eamodio/vscode-toggle-excluded-files/issues/<issue>) thanks to [PR #\<pr\>](https://github.com/eamodio/vscode-toggle-excluded-files/issues/<pr>) by Your Name ([@\<your-github-username\>](https://github.com/<your-github-username>))
+>
+> Fixed
+>
+> - Fixes [#\<issue\>](https://github.com/eamodio/vscode-toggle-excluded-files/issues/<issue>) a bug or regression &mdash; thanks to [PR #\<pr\>](https://github.com/eamodio/vscode-toggle-excluded-files/issues/<pr>) by Your Name ([@\<your-github-username\>](https://github.com/<your-github-username>))
 
 ### Update the README
 

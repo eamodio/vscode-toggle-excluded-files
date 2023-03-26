@@ -19,15 +19,16 @@ test/**
 .eslintcache
 .eslintignore
 .eslintrc*.json
+.git-blame-ignore-revs
 .gitattributes
 .gitignore
-.gitignore-revs
 .mailmap
 .prettierignore
 .prettierrc
 .yarnrc
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
+README.pre.md
 tsconfig*.json
 tsconfig*.tsbuildinfo
 webpack.config*.js
