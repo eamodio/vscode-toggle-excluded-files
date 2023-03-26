@@ -31,6 +31,9 @@
 			"description": "Join us in the #toggle-excluded-files channel"
 		}
 	],
+	"sponsor": {
+		"url": "https://github.com/sponsors/eamodio"
+	},
 	"categories": [
 		"Other"
 	],
@@ -169,25 +172,25 @@
 	"devDependencies": {
 		"@types/node": "16.11.47",
 		"@types/vscode": "1.72.0",
-		"@typescript-eslint/eslint-plugin": "5.54.0",
-		"@typescript-eslint/parser": "5.54.0",
+		"@typescript-eslint/eslint-plugin": "5.56.0",
+		"@typescript-eslint/parser": "5.56.0",
 		"@vscode/vsce": "2.18.0",
 		"circular-dependency-plugin": "5.2.2",
 		"clean-webpack-plugin": "4.0.0",
-		"esbuild": "0.17.10",
+		"esbuild": "0.17.14",
 		"esbuild-loader": "3.0.1",
-		"eslint": "8.35.0",
+		"eslint": "8.36.0",
 		"eslint-cli": "1.1.1",
-		"eslint-config-prettier": "8.6.0",
+		"eslint-config-prettier": "8.8.0",
 		"eslint-import-resolver-typescript": "3.5.3",
 		"eslint-plugin-anti-trojan-source": "1.1.1",
 		"eslint-plugin-import": "2.27.5",
-		"fork-ts-checker-webpack-plugin": "6.5.2",
-		"prettier": "2.8.4",
-		"terser-webpack-plugin": "5.3.6",
+		"fork-ts-checker-webpack-plugin": "6.5.3",
+		"prettier": "2.8.7",
+		"terser-webpack-plugin": "5.3.7",
 		"ts-loader": "9.4.2",
-		"typescript": "4.9.5",
-		"webpack": "5.75.0",
+		"typescript": "5.0.2",
+		"webpack": "5.76.3",
 		"webpack-bundle-analyzer": "4.8.0",
 		"webpack-cli": "5.0.1"
 	}
