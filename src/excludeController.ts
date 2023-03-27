@@ -1,14 +1,14 @@
 import type { ConfigurationChangeEvent, Disposable, Event } from 'vscode';
 import { ConfigurationTarget, EventEmitter } from 'vscode';
-import { ContextKeys, WorkspaceState } from './constants';
+import type { CoreConfiguration } from './constants';
 import type { Container } from './container';
 import { setContext } from './context';
+import type { Storage, StoredFilesExcludes } from './storage';
 import { configuration } from './system/configuration';
 import { Logger } from './system/logger';
 import { areEqual } from './system/object';
 
-type ConfigInspect<T> = ReturnType<typeof configuration.inspectAny<T>>;
-type FilesExcludeInspect = ConfigInspect<Record<string, boolean>>;
+export type FilesExcludeConfiguration = Record<string, boolean>;
 
 export class FilesExcludeController implements Disposable {
 	private _onDidToggle = new EventEmitter<void>();
@@ -16,35 +16,26 @@ export class FilesExcludeController implements Disposable {
 		return this._onDidToggle.event;
 	}
 
-	private _disposable: Disposable;
-	private readonly _section = 'files.exclude' as const;
+	private readonly _disposable: Disposable;
 	private _working: boolean = false;
 
-	constructor(private readonly container: Container) {
-		this._disposable = configuration.onDidChangeAny(this.onConfigurationChanged, this);
-		this.onConfigurationChanged();
+	constructor(private readonly container: Container, private readonly storage: Storage) {
+		this._disposable = configuration.onDidChangeAny(this.onAnyConfigurationChanged, this);
+		this.onAnyConfigurationChanged();
 	}
 
 	dispose() {
-		this._disposable?.dispose();
+		this._disposable.dispose();
 	}
 
-	private get appliedState(): WorkspaceState {
-		return WorkspaceState.AppliedState;
-	}
-
-	private get savedState(): WorkspaceState {
-		return WorkspaceState.SavedState;
-	}
-
-	private onConfigurationChanged(e?: ConfigurationChangeEvent) {
+	private onAnyConfigurationChanged(e?: ConfigurationChangeEvent) {
 		if (this._working) return;
-		if (e != null && !e.affectsConfiguration(this._section)) return;
+		if (e != null && !configuration.changedAny<CoreConfiguration>(e, 'files.exclude')) return;
 
 		const savedExclude = this.getSavedExcludeConfiguration();
 		if (savedExclude == null) return;
 
-		Logger.log('ExcludeController.onConfigurationChanged');
+		Logger.log('FilesExcludeController.onOtherConfigurationChanged()');
 
 		const newExclude = this.getExcludeConfiguration();
 		if (
@@ -65,7 +56,7 @@ export class FilesExcludeController implements Disposable {
 			return;
 		}
 
-		Logger.log('ExcludeController.onConfigurationChanged', 'clearing state');
+		Logger.log('FilesExcludeController.onOtherConfigurationChanged()', 'clearing state');
 
 		// Remove the currently saved config, since it was directly edited
 		void this.clearExcludeConfiguration();
@@ -75,7 +66,7 @@ export class FilesExcludeController implements Disposable {
 		// If we have saved state, the we are already applied to exit
 		if (this._working || this.hasSavedExcludeConfiguration()) return;
 
-		Logger.log(`ExcludeController.applyConfiguration('${this._section}')`);
+		Logger.log('FilesExcludeController.applyConfiguration()');
 
 		try {
 			this._working = true;
@@ -83,7 +74,7 @@ export class FilesExcludeController implements Disposable {
 			const exclude = this.getExcludeConfiguration()!;
 			await this.saveExcludeConfiguration(exclude);
 
-			const appliedExclude: FilesExcludeInspect = {
+			const appliedExcludes: StoredFilesExcludes = {
 				key: exclude.key,
 				globalValue: exclude.globalValue == null ? undefined : {},
 				workspaceValue: exclude.workspaceValue == null ? undefined : {},
@@ -92,22 +83,34 @@ export class FilesExcludeController implements Disposable {
 
 			const promises: Thenable<void>[] = [];
 
-			if (exclude.globalValue != null && appliedExclude.globalValue != null) {
-				const apply = Object.create(null);
+			if (exclude.globalValue != null && appliedExcludes.globalValue != null) {
+				const apply: FilesExcludeConfiguration = Object.create(null);
 				for (const key of Object.keys(exclude.globalValue)) {
-					appliedExclude.globalValue[key] = apply[key] = false;
+					appliedExcludes.globalValue[key] = apply[key] = false;
 				}
 
-				promises.push(configuration.updateAny(this._section, apply, ConfigurationTarget.Global));
+				promises.push(
+					configuration.updateAny<CoreConfiguration, FilesExcludeConfiguration>(
+						'files.exclude',
+						apply,
+						ConfigurationTarget.Global,
+					),
+				);
 			}
 
-			if (exclude.workspaceValue != null && appliedExclude.workspaceValue != null) {
-				const apply = Object.create(null);
+			if (exclude.workspaceValue != null && appliedExcludes.workspaceValue != null) {
+				const apply: FilesExcludeConfiguration = Object.create(null);
 				for (const key of Object.keys(exclude.workspaceValue)) {
-					appliedExclude.workspaceValue[key] = apply[key] = false;
+					appliedExcludes.workspaceValue[key] = apply[key] = false;
 				}
 
-				promises.push(configuration.updateAny(this._section, apply, ConfigurationTarget.Workspace));
+				promises.push(
+					configuration.updateAny<CoreConfiguration, FilesExcludeConfiguration>(
+						'files.exclude',
+						apply,
+						ConfigurationTarget.Workspace,
+					),
+				);
 			}
 
 			// if (exclude.workspaceFolderValue != null && appliedExclude.workspaceFolderValue != null) {
@@ -119,16 +122,16 @@ export class FilesExcludeController implements Disposable {
 			// 	promises.push(configuration.updateAny(this._section, apply, ConfigurationTarget.WorkspaceFolder));
 			// }
 
-			await this.saveAppliedExcludeConfiguration(appliedExclude);
+			await this.saveAppliedExcludeConfiguration(appliedExcludes);
 
 			if (!promises.length) return;
 
-			void (await Promise.allSettled(promises));
+			await Promise.allSettled(promises);
 		} catch (ex) {
 			Logger.error(ex);
 			await this.clearExcludeConfiguration();
 		} finally {
-			Logger.log(`applyConfiguration('${this._section}')`, 'done');
+			Logger.log('FilesExcludeController.applyConfiguration()', 'done');
 
 			this._working = false;
 			this._onDidToggle.fire();
@@ -139,25 +142,29 @@ export class FilesExcludeController implements Disposable {
 		// If we don't have saved state, the we don't have anything to restore so exit
 		if (this._working || !this.hasSavedExcludeConfiguration()) return;
 
-		Logger.log(`ExcludeController.restoreConfiguration('${this._section}')`);
+		Logger.log('FilesExcludeController.restoreConfiguration()');
 
 		try {
 			this._working = true;
-			const savedExclude = this.getSavedExcludeConfiguration();
+			const excludes = this.getSavedExcludeConfiguration();
 
 			const promises: Thenable<void>[] = [];
 
-			if (savedExclude != null) {
-				if (savedExclude.globalValue != null) {
+			if (excludes != null) {
+				if (excludes.globalValue != null) {
 					promises.push(
-						configuration.updateAny(this._section, savedExclude.globalValue, ConfigurationTarget.Global),
+						configuration.updateAny<CoreConfiguration, FilesExcludeConfiguration>(
+							'files.exclude',
+							excludes.globalValue,
+							ConfigurationTarget.Global,
+						),
 					);
 				}
-				if (savedExclude.workspaceValue != null) {
+				if (excludes.workspaceValue != null) {
 					promises.push(
-						configuration.updateAny(
-							this._section,
-							savedExclude.workspaceValue,
+						configuration.updateAny<CoreConfiguration, FilesExcludeConfiguration>(
+							'files.exclude',
+							excludes.workspaceValue,
 							ConfigurationTarget.Workspace,
 						),
 					);
@@ -169,12 +176,12 @@ export class FilesExcludeController implements Disposable {
 
 			if (!promises.length) return;
 
-			await Promise.all(promises);
+			await Promise.allSettled(promises);
 		} catch (ex) {
 			Logger.error(ex);
 			await this.clearExcludeConfiguration();
 		} finally {
-			Logger.log(`ExcludeController.restoreConfiguration('${this._section}')`, 'done');
+			Logger.log('FilesExcludeController.restoreConfiguration()', 'done');
 
 			this._working = false;
 			this._onDidToggle.fire();
@@ -184,7 +191,7 @@ export class FilesExcludeController implements Disposable {
 	async toggleConfiguration() {
 		if (this._working) return;
 
-		Logger.log(`ExcludeController.toggleConfiguration('${this._section}')`);
+		Logger.log('FilesExcludeController.toggleConfiguration()');
 
 		if (this.hasSavedExcludeConfiguration()) {
 			await this.restoreConfiguration();
@@ -207,34 +214,39 @@ export class FilesExcludeController implements Disposable {
 		await this.saveExcludeConfiguration(undefined);
 	}
 
-	private getExcludeConfiguration(): FilesExcludeInspect | undefined {
-		return configuration.inspectAny<Record<string, boolean>>(this._section);
+	private getAppliedExcludeConfiguration(): StoredFilesExcludes | undefined {
+		return this.storage.getWorkspace('appliedState');
 	}
 
-	private getAppliedExcludeConfiguration(): FilesExcludeInspect | undefined {
-		return this.container.context.workspaceState.get<FilesExcludeInspect>(this.appliedState);
+	private getExcludeConfiguration(): StoredFilesExcludes | undefined {
+		return configuration.inspectAny<CoreConfiguration, Record<string, boolean>>('files.exclude');
 	}
 
-	private _loaded = false;
-	private getSavedExcludeConfiguration(): FilesExcludeInspect | undefined {
-		const state = this.container.context.workspaceState.get<FilesExcludeInspect>(this.savedState);
-		void setContext(ContextKeys.Toggled, state != null);
-		if (!this._loaded) {
-			this._loaded = true;
-			void setContext(ContextKeys.Loaded, true);
-		}
-		return state;
+	private getSavedExcludeConfiguration(): StoredFilesExcludes | undefined {
+		const excludes = this.storage.getWorkspace('savedState');
+		this.updateContext(excludes);
+		return excludes;
 	}
 
 	private hasSavedExcludeConfiguration(): boolean {
 		return this.getSavedExcludeConfiguration() != null;
 	}
 
-	private async saveAppliedExcludeConfiguration(excluded: FilesExcludeInspect | undefined): Promise<void> {
-		await this.container.context.workspaceState.update(this.appliedState, excluded);
+	private saveAppliedExcludeConfiguration(excludes: StoredFilesExcludes | undefined): Promise<void> {
+		return this.storage.storeWorkspace('appliedState', excludes);
 	}
 
-	private async saveExcludeConfiguration(excluded: FilesExcludeInspect | undefined): Promise<void> {
-		await this.container.context.workspaceState.update(this.savedState, excluded);
+	private saveExcludeConfiguration(excludes: StoredFilesExcludes | undefined): Promise<void> {
+		this.updateContext(excludes);
+		return this.storage.storeWorkspace('savedState', excludes);
+	}
+
+	private _loaded = false;
+	private updateContext(excludes: StoredFilesExcludes | undefined) {
+		void setContext('toggleexcludedfiles:toggled', excludes != null);
+		if (!this._loaded) {
+			this._loaded = true;
+			void setContext('toggleexcludedfiles:loaded', true);
+		}
 	}
 }

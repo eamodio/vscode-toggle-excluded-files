@@ -1,6 +1,7 @@
 import type { ConfigurationChangeEvent, StatusBarItem } from 'vscode';
 import { Disposable, StatusBarAlignment, window } from 'vscode';
-import { commandPrefix } from './constants';
+import type { Commands, CoreConfiguration } from './constants';
+import { extensionPrefix } from './constants';
 import type { Container } from './container';
 import { configuration } from './system/configuration';
 
@@ -10,12 +11,11 @@ export class StatusBarController implements Disposable {
 
 	constructor(private readonly container: Container) {
 		this._disposable = Disposable.from(
-			configuration.onDidChangeAny(this.onConfigurationChanged, this),
-			configuration.onDidChange(this.onConfigurationChanged, this),
+			configuration.onDidChangeAny(this.onAnyConfigurationChanged, this),
 			container.filesExclude.onDidToggle(this._onExcludeToggled, this),
 		);
 
-		this.onConfigurationChanged();
+		this.onAnyConfigurationChanged();
 	}
 
 	dispose() {
@@ -23,14 +23,18 @@ export class StatusBarController implements Disposable {
 		this._disposable?.dispose();
 	}
 
-	private onConfigurationChanged(e?: ConfigurationChangeEvent) {
-		if (e == null || configuration.changed(e, 'statusBar.enabled') || e.affectsConfiguration('files.exclude')) {
+	private onAnyConfigurationChanged(e?: ConfigurationChangeEvent) {
+		if (
+			e == null ||
+			configuration.changed(e, 'statusBar.enabled') ||
+			configuration.changedAny<CoreConfiguration>(e, 'files.exclude')
+		) {
 			this._statusBarItem?.dispose();
 
 			const { canToggle } = this.container.filesExclude;
 			if (configuration.get('statusBar.enabled') && canToggle) {
 				this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 0);
-				this._statusBarItem.command = `${commandPrefix}.toggle`;
+				this._statusBarItem.command = `${extensionPrefix}.toggle` satisfies Commands;
 				this.updateStatusBarItem(this.container.filesExclude.toggled);
 				this._statusBarItem.show();
 			}

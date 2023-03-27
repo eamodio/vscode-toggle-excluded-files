@@ -89,9 +89,7 @@ export function log<T extends (...arg: any) => any>(options?: LogOptions<T>, deb
 		scoped = true;
 	}
 
-	const logFn = (debug ? Logger.debug.bind(Logger) : Logger.log.bind(Logger)) as
-		| typeof Logger.debug
-		| typeof Logger.log;
+	const logFn = debug ? Logger.debug.bind(Logger) : Logger.log.bind(Logger);
 	const warnFn = Logger.warn.bind(Logger);
 
 	return (target: any, key: string, descriptor: PropertyDescriptor & Record<string, any>) => {

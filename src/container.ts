@@ -1,8 +1,11 @@
-import type { ExtensionContext } from 'vscode';
-import { Commands } from './commands';
+import type { ConfigurationChangeEvent, ExtensionContext } from 'vscode';
+import { CommandProvider } from './commands';
+import { fromOutputLevel } from './config';
 import { FilesExcludeController } from './excludeController';
 import { StatusBarController } from './statusBarController';
+import { Storage } from './storage';
 import { configuration } from './system/configuration';
+import { Logger } from './system/logger';
 
 export class Container {
 	static #instance: Container | undefined;
@@ -34,14 +37,12 @@ export class Container {
 	private constructor(context: ExtensionContext) {
 		this._context = context;
 
-		context.subscriptions.splice(0, 0, (this._filesExcludeController = new FilesExcludeController(this)));
-		context.subscriptions.splice(0, 0, (this._statusBar = new StatusBarController(this)));
-		context.subscriptions.splice(0, 0, (this._commands = new Commands(this)));
-	}
+		context.subscriptions.unshift((this._storage = new Storage(context)));
+		context.subscriptions.unshift((this._filesExcludeController = new FilesExcludeController(this, this._storage)));
+		context.subscriptions.unshift((this._statusBar = new StatusBarController(this)));
 
-	private _commands: Commands;
-	get commands() {
-		return this._commands;
+		context.subscriptions.unshift(new CommandProvider(this));
+		context.subscriptions.unshift(configuration.onDidChangeAny(this.onAnyConfigurationChanged, this));
 	}
 
 	private _context: ExtensionContext;
@@ -57,6 +58,17 @@ export class Container {
 	private _statusBar: StatusBarController;
 	get statusBar() {
 		return this._statusBar;
+	}
+
+	private _storage: Storage;
+	get storage() {
+		return this._storage;
+	}
+
+	private onAnyConfigurationChanged(e: ConfigurationChangeEvent) {
+		if (configuration.changed(e, 'outputLevel')) {
+			Logger.logLevel = fromOutputLevel(configuration.get('outputLevel'));
+		}
 	}
 }
 

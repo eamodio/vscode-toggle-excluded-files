@@ -1,22 +1,20 @@
-import { commands, EventEmitter } from 'vscode';
+import { EventEmitter } from 'vscode';
 import type { ContextKeys } from './constants';
-import { CoreCommands } from './constants';
+import { executeCoreCommand } from './system/command';
 
 const contextStorage = new Map<string, unknown>();
 
-type AllContextKeys = ContextKeys;
-
-const _onDidChangeContext = new EventEmitter<AllContextKeys>();
+const _onDidChangeContext = new EventEmitter<ContextKeys>();
 export const onDidChangeContext = _onDidChangeContext.event;
 
-export function getContext<T>(key: AllContextKeys): T | undefined;
-export function getContext<T>(key: AllContextKeys, defaultValue: T): T;
-export function getContext<T>(key: AllContextKeys, defaultValue?: T): T | undefined {
+export function getContext<T>(key: ContextKeys): T | undefined;
+export function getContext<T>(key: ContextKeys, defaultValue: T): T;
+export function getContext<T>(key: ContextKeys, defaultValue?: T): T | undefined {
 	return (contextStorage.get(key) as T | undefined) ?? defaultValue;
 }
 
-export async function setContext(key: AllContextKeys, value: unknown): Promise<void> {
+export async function setContext(key: ContextKeys, value: unknown): Promise<void> {
 	contextStorage.set(key, value);
-	void (await commands.executeCommand(CoreCommands.SetContext, key, value));
+	void (await executeCoreCommand('setContext', key, value));
 	_onDidChangeContext.fire(key);
 }
