@@ -3,9 +3,9 @@ import { CommandProvider } from './commands';
 import { fromOutputLevel } from './config';
 import { FilesExcludeController } from './excludeController';
 import { StatusBarController } from './statusBarController';
-import { Storage } from './storage';
 import { configuration } from './system/configuration';
 import { Logger } from './system/logger';
+import { Storage } from './system/storage';
 
 export class Container {
 	static #instance: Container | undefined;

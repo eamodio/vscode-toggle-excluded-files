@@ -34,7 +34,7 @@ export class StatusBarController implements Disposable {
 			const { canToggle } = this.container.filesExclude;
 			if (configuration.get('statusBar.enabled') && canToggle) {
 				this._statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 0);
-				this._statusBarItem.command = `${extensionPrefix}.toggle` satisfies Commands;
+				this._statusBarItem.command = `${extensionPrefix}.toggle` satisfies keyof Commands;
 				this.updateStatusBarItem(this.container.filesExclude.toggled);
 				this._statusBarItem.show();
 			}

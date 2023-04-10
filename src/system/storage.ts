@@ -1,10 +1,14 @@
 import type { Disposable, Event, ExtensionContext, SecretStorageChangeEvent } from 'vscode';
 import { EventEmitter } from 'vscode';
-import type { CoreConfiguration } from './constants';
-import { extensionPrefix } from './constants';
-import type { FilesExcludeConfiguration } from './excludeController';
-import type { configuration } from './system/configuration';
-import { debug } from './system/decorators/log';
+import type {
+	DeprecatedGlobalStorage,
+	DeprecatedWorkspaceStorage,
+	GlobalStorage,
+	SecretKeys,
+	WorkspaceStorage,
+} from '../constants';
+import { extensionPrefix } from '../constants';
+import { debug } from './decorators/log';
 
 export type StorageChangeEvent =
 	| {
@@ -100,24 +104,11 @@ export class Storage implements Disposable {
 	}
 
 	@debug({ args: { 1: false }, logThreshold: 250 })
-	async storeWorkspace(key: keyof WorkspaceStorage, value: unknown | undefined): Promise<void> {
+	async storeWorkspace<T extends keyof WorkspaceStorage>(
+		key: T,
+		value: WorkspaceStorage[T] | undefined,
+	): Promise<void> {
 		await this.context.workspaceState.update(`${extensionPrefix}:${key}`, value);
 		this._onDidChange.fire({ key: key, workspace: true });
 	}
 }
-
-export type SecretKeys = never;
-
-export type DeprecatedGlobalStorage = object;
-
-export type GlobalStorage = object;
-
-export type DeprecatedWorkspaceStorage = object;
-
-export type WorkspaceStorage = {
-	appliedState: StoredFilesExcludes;
-	savedState: StoredFilesExcludes;
-};
-
-type ConfigInspect<T> = ReturnType<typeof configuration.inspectAny<CoreConfiguration, T>>;
-export type StoredFilesExcludes = ConfigInspect<FilesExcludeConfiguration>;

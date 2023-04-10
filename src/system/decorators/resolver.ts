@@ -14,9 +14,7 @@ function replacer(key: string, value: any): any {
 		}
 		return value.toString();
 	}
-	if (isContainer(value)) {
-		return '<container>';
-	}
+	if (isContainer(value)) return '<container>';
 
 	return value;
 }
@@ -48,9 +46,7 @@ export function defaultResolver(...args: any[]): string {
 				}
 				return arg0.toString();
 			}
-			if (isContainer(arg0)) {
-				return '<container>';
-			}
+			if (isContainer(arg0)) return '<container>';
 
 			return JSON.stringify(arg0, replacer);
 	}

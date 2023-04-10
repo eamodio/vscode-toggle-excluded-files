@@ -2,11 +2,15 @@ import type { Command, Disposable } from 'vscode';
 import { commands } from 'vscode';
 import type { Commands, CoreCommands } from '../constants';
 
-export function registerCommand(command: Commands, callback: (...args: any[]) => any, thisArg?: any): Disposable {
+export function registerCommand<T extends keyof Commands>(
+	command: T,
+	callback: (...args: Commands[T]) => unknown,
+	thisArg?: any,
+): Disposable {
 	return commands.registerCommand(command, callback, thisArg);
 }
 
-export function createCommand<T extends unknown[]>(command: Commands, title: string, ...args: T): Command {
+export function createCommand<T extends keyof Commands>(command: T, title: string, ...args: Commands[T]): Command {
 	return {
 		command: command,
 		title: title,
@@ -14,10 +18,7 @@ export function createCommand<T extends unknown[]>(command: Commands, title: str
 	};
 }
 
-export function executeCommand<U = any>(command: Commands): Thenable<U>;
-export function executeCommand<T = unknown, U = any>(command: Commands, arg: T): Thenable<U>;
-export function executeCommand<T extends [...unknown[]] = [], U = any>(command: Commands, ...args: T): Thenable<U>;
-export function executeCommand<T extends [...unknown[]] = [], U = any>(command: Commands, ...args: T): Thenable<U> {
+export function executeCommand<T extends keyof Commands, U = any>(command: T, ...args: Commands[T]): Thenable<U> {
 	return commands.executeCommand<U>(command, ...args);
 }
 

@@ -1,12 +1,12 @@
 import type { ConfigurationChangeEvent, Disposable, Event } from 'vscode';
 import { ConfigurationTarget, EventEmitter } from 'vscode';
-import type { CoreConfiguration } from './constants';
+import type { CoreConfiguration, StoredFilesExcludes } from './constants';
 import type { Container } from './container';
-import { setContext } from './context';
-import type { Storage, StoredFilesExcludes } from './storage';
 import { configuration } from './system/configuration';
+import { setContext } from './system/context';
 import { Logger } from './system/logger';
 import { areEqual } from './system/object';
+import type { Storage } from './system/storage';
 
 export type FilesExcludeConfiguration = Record<string, boolean>;
 

@@ -1,10 +1,11 @@
 import { Disposable } from 'vscode';
+import type { PaletteCommands } from './constants';
 import type { Container } from './container';
 import { registerCommand } from './system/command';
 import type { Command } from './system/decorators/command';
 import { createCommandDecorator } from './system/decorators/command';
 
-const registrableCommands: Command[] = [];
+const registrableCommands: Command<keyof PaletteCommands>[] = [];
 const command = createCommandDecorator(registrableCommands);
 
 export class CommandProvider implements Disposable {
