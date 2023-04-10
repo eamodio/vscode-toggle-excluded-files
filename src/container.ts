@@ -37,12 +37,19 @@ export class Container {
 	private constructor(context: ExtensionContext) {
 		this._context = context;
 
-		context.subscriptions.unshift((this._storage = new Storage(context)));
-		context.subscriptions.unshift((this._filesExcludeController = new FilesExcludeController(this, this._storage)));
-		context.subscriptions.unshift((this._statusBar = new StatusBarController(this)));
+		const disposables = [
+			(this._storage = new Storage(context)),
+			(this._filesExcludeController = new FilesExcludeController(this, this._storage)),
+			(this._statusBar = new StatusBarController(this)),
+			new CommandProvider(this),
+			configuration.onDidChangeAny(this.onAnyConfigurationChanged, this),
+		];
 
-		context.subscriptions.unshift(new CommandProvider(this));
-		context.subscriptions.unshift(configuration.onDidChangeAny(this.onAnyConfigurationChanged, this));
+		context.subscriptions.push({
+			dispose: function () {
+				disposables.reverse().forEach(d => void d.dispose());
+			},
+		});
 	}
 
 	private _context: ExtensionContext;
