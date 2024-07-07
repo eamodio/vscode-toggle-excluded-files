@@ -1,4 +1,4 @@
-import { LogLevel } from './system/logger.constants';
+import { LogLevel } from './system/logger.constants'
 
 export enum OutputLevel {
 	Silent = 'silent',
@@ -9,25 +9,25 @@ export enum OutputLevel {
 
 export interface Config {
 	explorer: {
-		enabled: boolean;
-	};
-	outputLevel: OutputLevel;
+		enabled: boolean
+	}
+	outputLevel: OutputLevel
 	statusBar: {
-		enabled: boolean;
-	};
+		enabled: boolean
+	}
 }
 
 export function fromOutputLevel(level: LogLevel | OutputLevel): LogLevel {
 	switch (level) {
 		case OutputLevel.Silent:
-			return LogLevel.Off;
+			return LogLevel.Off
 		case OutputLevel.Errors:
-			return LogLevel.Error;
+			return LogLevel.Error
 		case OutputLevel.Verbose:
-			return LogLevel.Info;
+			return LogLevel.Info
 		case OutputLevel.Debug:
-			return LogLevel.Debug;
+			return LogLevel.Debug
 		default:
-			return level;
+			return level
 	}
 }

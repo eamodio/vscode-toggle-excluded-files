@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const fs = require('fs');
+const fs = require('fs')
 
 // // Patch README
 // const insert = fs.readFileSync('./README.pre.md', { encoding: 'utf8' });
@@ -9,19 +8,19 @@ const fs = require('fs');
 // }
 
 // Patch package.json
-const date = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
-let packageJSON = require('../package.json');
+const date = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }))
+let packageJSON = require('../package.json')
 
 packageJSON = JSON.stringify(
 	{
 		...packageJSON,
-		version: `${String(date.getFullYear())}.${date.getMonth() + 1}.${date.getDate()}${String(
-			date.getHours(),
-		).padStart(2, '0')}`,
+		version: `${String(date.getFullYear())}.${
+			date.getMonth() + 1
+		}.${date.getDate()}${String(date.getHours()).padStart(2, '0')}`,
 	},
 	undefined,
 	'\t',
-);
-packageJSON += '\n';
+)
+packageJSON += '\n'
 
-fs.writeFileSync('./package.json', packageJSON);
+fs.writeFileSync('./package.json', packageJSON)

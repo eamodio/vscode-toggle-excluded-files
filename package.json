@@ -1,17 +1,10 @@
 {
 	"name": "toggle-excluded-files",
 	"displayName": "Toggle Excluded Files",
-	"description": "Quickly toggles excluded (hidden) files visibility in the file explorer",
 	"version": "2.0.0",
-	"engines": {
-		"vscode": "^1.72.0"
-	},
-	"license": "SEE LICENSE IN LICENSE",
-	"publisher": "amodio",
-	"author": {
-		"name": "Eric Amodio",
-		"email": "eamodio@gmail.com"
-	},
+	"description": "Quickly toggles excluded (hidden) files visibility in the file explorer",
+	"categories": ["Other"],
+	"keywords": ["explorer", "files", "hidden", "exclude", "show", "toggle"],
 	"homepage": "https://github.com/eamodio/vscode-toggle-excluded-files/blob/master/README.md",
 	"bugs": {
 		"url": "https://github.com/eamodio/vscode-toggle-excluded-files/issues"
@@ -20,44 +13,57 @@
 		"type": "git",
 		"url": "https://github.com/eamodio/vscode-toggle-excluded-files.git"
 	},
+	"license": "SEE LICENSE IN LICENSE",
+	"author": {
+		"name": "Eric Amodio",
+		"email": "eamodio@gmail.com"
+	},
+	"publisher": "amodio",
 	"main": "./dist/toggle-excluded.js",
 	"browser": "./dist/browser/toggle-excluded.js",
-	"icon": "images/icon.png",
-	"preview": false,
-	"badges": [
-		{
-			"url": "https://img.shields.io/badge/vscode--dev--community-toggle--excluded--files-blue.svg?logo=slack&labelColor=555555",
-			"href": "https://vscode-slack.amod.io",
-			"description": "Join us in the #toggle-excluded-files channel"
-		}
-	],
-	"sponsor": {
-		"url": "https://github.com/sponsors/eamodio"
-	},
-	"categories": [
-		"Other"
-	],
-	"galleryBanner": {
-		"color": "#56098c",
-		"theme": "dark"
-	},
-	"keywords": [
-		"explorer",
-		"files",
-		"hidden",
-		"exclude",
-		"show",
-		"toggle"
-	],
-	"activationEvents": [
-		"onStartupFinished"
-	],
-	"capabilities": {
-		"untrustedWorkspaces": {
-			"supported": true
-		}
+	"scripts": {
+		"analyze:bundle": "webpack --mode production --env analyzeBundle",
+		"analyze:deps": "webpack --env analyzeDeps",
+		"build": "webpack --mode development",
+		"bundle": "webpack --mode production",
+		"clean": "npx rimraf dist out .vscode-test .vscode-test-web .eslintcache* tsconfig*.tsbuildinfo",
+		"lint": "biome lint . --fix",
+		"package": "vsce package --yarn",
+		"package-pre": "yarn run patch-pre && yarn run package --pre-release",
+		"patch-pre": "node ./scripts/applyPreReleasePatch.js",
+		"pretty": "biome check --write",
+		"pub": "vsce publish --yarn",
+		"pub-pre": "vsce publish --yarn --pre-release",
+		"rebuild": "yarn run reset && yarn run build",
+		"reset": "yarn run clean && yarn --frozen-lockfile",
+		"update-dts": "pushd \"src/@types\" && npx vscode-dts dev && popd",
+		"update-dts:master": "pushd \"src/@types\" && npx vscode-dts master && popd",
+		"vscode:prepublish": "yarn run bundle",
+		"watch": "webpack --watch --mode development",
+		"web": "vscode-test-web --extensionDevelopmentPath=. --folder-uri=vscode-vfs://github/eamodio/vscode-toggle-excluded-files",
+		"web:serve": "npx serve --cors -l 5000",
+		"web:tunnel": "npx localtunnel -p 5000"
 	},
 	"contributes": {
+		"commands": [
+			{
+				"command": "toggleexcludedfiles.show",
+				"title": "Show Excluded Files",
+				"category": "Files",
+				"icon": "$(eye)"
+			},
+			{
+				"command": "toggleexcludedfiles.restore",
+				"title": "Hide Excluded Files",
+				"category": "Files",
+				"icon": "$(eye-closed)"
+			},
+			{
+				"command": "toggleexcludedfiles.toggle",
+				"title": "Toggle Excluded Files",
+				"category": "Files"
+			}
+		],
 		"configuration": [
 			{
 				"id": "toggleexcludedfiles",
@@ -79,12 +85,7 @@
 					"toggleexcludedfiles.outputLevel": {
 						"type": "string",
 						"default": "errors",
-						"enum": [
-							"silent",
-							"errors",
-							"verbose",
-							"debug"
-						],
+						"enum": ["silent", "errors", "verbose", "debug"],
 						"enumDescriptions": [
 							"Logs nothing",
 							"Logs only errors",
@@ -95,25 +96,6 @@
 						"scope": "window"
 					}
 				}
-			}
-		],
-		"commands": [
-			{
-				"command": "toggleexcludedfiles.show",
-				"title": "Show Excluded Files",
-				"category": "Files",
-				"icon": "$(eye)"
-			},
-			{
-				"command": "toggleexcludedfiles.restore",
-				"title": "Hide Excluded Files",
-				"category": "Files",
-				"icon": "$(eye-closed)"
-			},
-			{
-				"command": "toggleexcludedfiles.toggle",
-				"title": "Toggle Excluded Files",
-				"category": "Files"
 			}
 		],
 		"keybindings": [
@@ -149,52 +131,48 @@
 			]
 		}
 	},
-	"scripts": {
-		"analyze:bundle": "webpack --mode production --env analyzeBundle",
-		"analyze:deps": "webpack --env analyzeDeps",
-		"build": "webpack --mode development",
-		"bundle": "webpack --mode production",
-		"clean": "npx rimraf dist out .vscode-test .vscode-test-web .eslintcache* tsconfig*.tsbuildinfo",
-		"lint": "eslint \"src/**/*.ts?(x)\" --fix",
-		"package": "vsce package --yarn",
-		"package-pre": "yarn run patch-pre && yarn run package --pre-release",
-		"patch-pre": "node ./scripts/applyPreReleasePatch.js",
-		"pretty": "prettier --config .prettierrc --loglevel warn --write .",
-		"pub": "vsce publish --yarn",
-		"pub-pre": "vsce publish --yarn --pre-release",
-		"rebuild": "yarn run reset && yarn run build",
-		"reset": "yarn run clean && yarn --frozen-lockfile",
-		"watch": "webpack --watch --mode development",
-		"web": "vscode-test-web --extensionDevelopmentPath=. --folder-uri=vscode-vfs://github/eamodio/vscode-toggle-excluded-files",
-		"web:serve": "npx serve --cors -l 5000",
-		"web:tunnel": "npx localtunnel -p 5000",
-		"update-dts": "pushd \"src/@types\" && npx vscode-dts dev && popd",
-		"update-dts:master": "pushd \"src/@types\" && npx vscode-dts master && popd",
-		"vscode:prepublish": "yarn run bundle"
-	},
+	"activationEvents": ["onStartupFinished"],
 	"devDependencies": {
-		"@types/node": "16.11.47",
+		"@biomejs/biome": "1.8.3",
+		"@types/node": "20.14.10",
 		"@types/vscode": "1.72.0",
-		"@typescript-eslint/eslint-plugin": "5.57.1",
-		"@typescript-eslint/parser": "5.57.1",
-		"@vscode/vsce": "2.18.0",
+		"@vscode/test-web": "^0.0.56",
+		"@vscode/vsce": "2.29.0",
 		"circular-dependency-plugin": "5.2.2",
 		"clean-webpack-plugin": "4.0.0",
-		"esbuild": "0.17.15",
-		"esbuild-loader": "3.0.1",
-		"eslint": "8.38.0",
-		"eslint-cli": "1.1.1",
-		"eslint-config-prettier": "8.8.0",
-		"eslint-import-resolver-typescript": "3.5.5",
-		"eslint-plugin-anti-trojan-source": "1.1.1",
-		"eslint-plugin-import": "2.27.5",
-		"fork-ts-checker-webpack-plugin": "6.5.3",
-		"prettier": "2.8.7",
-		"terser-webpack-plugin": "5.3.7",
-		"ts-loader": "9.4.2",
-		"typescript": "5.0.4",
-		"webpack": "5.78.0",
-		"webpack-bundle-analyzer": "4.8.0",
-		"webpack-cli": "5.0.1"
+		"esbuild": "0.23.0",
+		"esbuild-loader": "4.2.0",
+		"fork-ts-checker-webpack-plugin": "9.0.2",
+		"terser-webpack-plugin": "5.3.10",
+		"ts-loader": "9.5.1",
+		"typescript": "5.5.3",
+		"webpack": "5.92.1",
+		"webpack-bundle-analyzer": "4.10.2",
+		"webpack-cli": "5.1.4"
+	},
+	"packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+	"engines": {
+		"vscode": "^1.72.0"
+	},
+	"icon": "images/icon.png",
+	"badges": [
+		{
+			"description": "Join us in the #toggle-excluded-files channel",
+			"url": "https://img.shields.io/badge/vscode--dev--community-toggle--excluded--files-blue.svg?logo=slack&labelColor=555555",
+			"href": "https://vscode-slack.amod.io"
+		}
+	],
+	"galleryBanner": {
+		"color": "#56098c",
+		"theme": "dark"
+	},
+	"preview": false,
+	"capabilities": {
+		"untrustedWorkspaces": {
+			"supported": true
+		}
+	},
+	"sponsor": {
+		"url": "https://github.com/sponsors/eamodio"
 	}
 }

@@ -1,17 +1,17 @@
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
 
-const { spawnSync } = require('child_process');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const CircularDependencyPlugin = require('circular-dependency-plugin');
-const { CleanWebpackPlugin: CleanPlugin } = require('clean-webpack-plugin');
-const esbuild = require('esbuild');
-const { EsbuildPlugin } = require('esbuild-loader');
-const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin');
-const fs = require('fs');
-const path = require('path');
-const TerserPlugin = require('terser-webpack-plugin');
-const { optimize, WebpackError } = require('webpack');
+const { spawnSync } = require('child_process')
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+const CircularDependencyPlugin = require('circular-dependency-plugin')
+const { CleanWebpackPlugin: CleanPlugin } = require('clean-webpack-plugin')
+const esbuild = require('esbuild')
+const { EsbuildPlugin } = require('esbuild-loader')
+const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin')
+const fs = require('fs')
+const path = require('path')
+const TerserPlugin = require('terser-webpack-plugin')
+const { optimize, WebpackError } = require('webpack')
 
 module.exports =
 	/**
@@ -20,7 +20,7 @@ module.exports =
 	 * @returns { WebpackConfig[] }
 	 */
 	function (env, argv) {
-		const mode = argv.mode || 'none';
+		const mode = argv.mode || 'none'
 
 		env = {
 			analyzeBundle: false,
@@ -28,10 +28,10 @@ module.exports =
 			esbuild: true,
 			esbuildMinify: false,
 			...env,
-		};
+		}
 
-		return [getExtensionConfig('node', mode, env), getExtensionConfig('webworker', mode, env)];
-	};
+		return [getExtensionConfig('node', mode, env), getExtensionConfig('webworker', mode, env)]
+	}
 
 /**
  * @param { 'node' | 'webworker' } target
@@ -47,29 +47,15 @@ function getExtensionConfig(target, mode, env) {
 		new CleanPlugin(),
 		new ForkTsCheckerPlugin({
 			async: false,
-			eslint: {
-				enabled: true,
-				files: 'src/**/*.ts?(x)',
-				options: {
-					cache: true,
-					cacheLocation: path.join(__dirname, '.eslintcache/', target === 'webworker' ? 'browser/' : ''),
-					cacheStrategy: 'content',
-					fix: mode !== 'production',
-					overrideConfigFile: path.join(
-						__dirname,
-						target === 'webworker' ? '.eslintrc.browser.json' : '.eslintrc.json',
-					),
-				},
-			},
 			formatter: 'basic',
 			typescript: {
 				configFile: path.join(__dirname, target === 'webworker' ? 'tsconfig.browser.json' : 'tsconfig.json'),
 			},
 		}),
-	];
+	]
 
 	if (target === 'webworker') {
-		plugins.push(new optimize.LimitChunkCountPlugin({ maxChunks: 1 }));
+		plugins.push(new optimize.LimitChunkCountPlugin({ maxChunks: 1 }))
 	}
 
 	if (env.analyzeDeps) {
@@ -79,19 +65,19 @@ function getExtensionConfig(target, mode, env) {
 				exclude: /node_modules/,
 				failOnError: false,
 				onDetected: function ({ module: _webpackModuleRecord, paths, compilation }) {
-					if (paths.some(p => p.includes('container.ts'))) return;
+					if (paths.some(p => p.includes('container.ts'))) return
 
 					// @ts-ignore
-					compilation.warnings.push(new WebpackError(paths.join(' -> ')));
+					compilation.warnings.push(new WebpackError(paths.join(' -> ')))
 				},
 			}),
-		);
+		)
 	}
 
 	if (env.analyzeBundle) {
-		const out = path.join(__dirname, 'out');
+		const out = path.join(__dirname, 'out')
 		if (!fs.existsSync(out)) {
-			fs.mkdirSync(out);
+			fs.mkdirSync(out)
 		}
 
 		plugins.push(
@@ -102,7 +88,7 @@ function getExtensionConfig(target, mode, env) {
 				reportFilename: path.join(out, `extension-${target}-bundle-report.html`),
 				statsFilename: path.join(out, 'stats.json'),
 			}),
-		);
+		)
 	}
 
 	return {
@@ -131,7 +117,7 @@ function getExtensionConfig(target, mode, env) {
 							minify: true,
 							target: 'es2022',
 							treeShaking: true,
-					  })
+						})
 					: new TerserPlugin({
 							extractComments: false,
 							parallel: true,
@@ -150,7 +136,7 @@ function getExtensionConfig(target, mode, env) {
 								keep_classnames: true,
 								module: true,
 							},
-					  }),
+						}),
 			],
 			splitChunks:
 				target === 'webworker'
@@ -162,7 +148,7 @@ function getExtensionConfig(target, mode, env) {
 								default: false,
 								vendors: false,
 							},
-					  },
+						},
 		},
 		externals: {
 			vscode: 'commonjs vscode',
@@ -185,7 +171,7 @@ function getExtensionConfig(target, mode, env) {
 										target === 'webworker' ? 'tsconfig.browser.json' : 'tsconfig.json',
 									),
 								},
-						  }
+							}
 						: {
 								loader: 'ts-loader',
 								options: {
@@ -196,7 +182,7 @@ function getExtensionConfig(target, mode, env) {
 									experimentalWatchApi: true,
 									transpileOnly: true,
 								},
-						  },
+							},
 				},
 			],
 		},
@@ -213,7 +199,7 @@ function getExtensionConfig(target, mode, env) {
 				? undefined
 				: {
 						level: 'log', // enables logging required for problem matchers
-				  },
+					},
 		stats: {
 			preset: 'errors-warnings',
 			assets: true,
@@ -225,5 +211,5 @@ function getExtensionConfig(target, mode, env) {
 			warningsCount: true,
 			timings: true,
 		},
-	};
+	}
 }

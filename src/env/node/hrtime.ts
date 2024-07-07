@@ -1,1 +1,1 @@
-export { hrtime } from 'process';
+export { hrtime } from 'process'
